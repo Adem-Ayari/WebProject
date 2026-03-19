@@ -329,6 +329,8 @@
   width: 50px;
   grid-area: 1/1;
   z-index: 1;
+  object-fit: contain;
+  display: block;
 }
 .how-it-works .howitworks-wrapper .step div {
   height: 40px;

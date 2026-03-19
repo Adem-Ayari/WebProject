@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TeleMed | Online Healthcare</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="patient.css" />
+    <script src="patient.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body>
+    <div class="body">
+      <!-- navbar -->
+      <header class="navbar">
+        <div class="logo">
+          Health
+          <span>Connect</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#services">Services</a>
+          <a href="#howitworks">How It Works</a>
+          <a href="#doctors">Our Doctors</a>
+          <a href="#about">About</a>
+        </nav>
+
+        <div class="nav-actions">
+          <a href="../login_signup/login-register.html" class="signin">Sign In</a>
+          <a href="../book/book.html" class="btn">Book Appointment</a>
+        </div>
+      </header>
+      <!-- historique des consultations-->
+        <div class="container mt-5">
+          <div class="card shadow-sm">
+            <div class="card-header bg-white">
+              <h3>Consultation History & Past Care Plans</h3>
+            </div>
+            <div class="card-body">
+                <div class="card-body">
+      <div class="row g-2 mb-3">
+        <div class="col-md-4">
+          <input type="text" class="form-control" placeholder="Filter by name...">
+        </div>
+        <div class="col-md-2">
+          <select class="form-select">
+            <option selected>Filters</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-responsive">
+  <table class="table tabel-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Doctor</th>
+        <th>status</th>
+      </tr>
+    </thead>
+    <tbody class="prescription_data">
+    <tr>
+        <td>07/10/2023</td>
+        <td>Rx</td>
+        <td>Dr.Smith</td>
+        <td>Medical prescription</td>
+        <td class="text-end">
+            <button class="btn btn-sm btn-primary">View Details</button>
+            <button class="btn btn-sm btn-secondary">Download PDF</button>
+        </td>
+    </tr>
+    </tbody>
+ </table>
+</div>
+    </div>
+    </div>
+    </div>
+  </body>   
+</html>
