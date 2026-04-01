@@ -1,14 +1,14 @@
 const prescriptions = [
     {
         date: "07/10/2023",
-        type: "Rx",
-        doctor: "Dr. Smith",
+        patient: "John Doe",
+        Medical_resume: "Bacterial Infection",
         status: "Active"
     },
     {
         date: "12/09/2023",
-        type: "Plan",
-        doctor: "Dr. Wilson",
+        patient: "Jane Doe",
+        Medical_resume: "Viral Infection",
         status: "Complete"
     }
 ];
@@ -19,11 +19,11 @@ function loadPrescription(){
     prescriptions.forEach(item=>{
         const row=`<tr>
         <td>${item.date}</td>
-        <td>${item.type}</td>
-        <td>${item.doctor}</td>
+        <td>${item.patient}</td>
+        <td>${item.Medical_resume}</td>
         <td>${item.status}</td>
         <td class="text-end">
-            <button class="btn btn-sm btn-secondary">Download PDF</button>
+            <button class="btn btn-sm btn-secondary">Send PDF</button>
         </td>
         </tr>`;
         prescriptionList.innerHTML+=row;

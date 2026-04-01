@@ -10,7 +10,7 @@
     <header>
       <div class="logo">Health <span>Connect</span></div>
       <nav class="navigation">
-        <a href="../homepage/index.html" class="btn-home">Home</a>
+        <a href="../homepage/index.php" class="btn-home">Home</a>
       </nav>
     </header>
 
@@ -83,7 +83,8 @@
         document.getElementById("doctorAbout").innerText = doctor.about;
         document.getElementById("doctorPhone").innerText = doctor.contact.phone;
         document.getElementById("doctorEmail").innerText = doctor.contact.email;
-      } else {
+      } 
+      else {
         document.body.innerHTML = "<h1>Doctor not found</h1>";
       }
     </script>
