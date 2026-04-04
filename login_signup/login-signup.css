@@ -93,7 +93,7 @@ header {
 .form-box-login {
   width: 100%;
   padding: 40px;
-  display: none;
+  display: block;
 }
 
 .form-box-login h2 {
@@ -208,7 +208,7 @@ header {
 .form-box-register {
   width: 100%;
   padding: 40px;
-  display: block;
+  display: none;
 }
 
 .form-box-register h2 {

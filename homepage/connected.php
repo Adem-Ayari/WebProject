@@ -1,3 +1,34 @@
+<?php
+session_start();
+
+if (empty($_SESSION['user_id'])) {
+  header('Location: ../login_signup/login-register.php?force_login=1');
+  exit;
+}
+
+if (empty($_SESSION['csrf_token'])) {
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    http_response_code(400);
+    exit('Invalid request');
+  }
+
+  $_SESSION = [];
+
+  if (ini_get('session.use_cookies')) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+  }
+
+  session_destroy();
+  header('Location: index.php');
+  exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -32,9 +63,12 @@
         </nav>
 
         <div class="nav-actions">
-          <a href="../login_signup/login-register.html" class="signin">Sign In</a>
-          <a href="../dashboard_client/patient.html" class="btn">Dashboard</a>
-          <a href="../book/book.html" class="btn">Book Appointment</a>
+          <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
+            <button type="submit" name="logout_submit" class="signin">Logout</button>
+          </form>
+          <a href="../dashboard_client/patient.php" class="btn">Dashboard</a>
+          <a href="../book/book.php" class="btn">Book Appointment</a>
         </div>
       </header>
 
@@ -53,7 +87,7 @@
               anytime you need.
             </p>
             <div class="hero-buttons">
-              <a href="../book/book.html" class="btn-primary">
+              <a href="../book/book.php" class="btn-primary">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -566,7 +600,7 @@
               </div>
               <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
                 <a
-                  href="../book/book.html"
+                  href="../book/book.php"
                   class="doctors-btn doctors-btn-primary"
                   style="margin-bottom: 0.5rem"
                 >
@@ -635,7 +669,7 @@
               </div>
               <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
                 <a
-                  href="../book/book.html"
+                  href="../book/book.php"
                   class="doctors-btn doctors-btn-primary"
                   style="margin-bottom: 0.5rem"
                 >
@@ -704,7 +738,7 @@
               </div>
               <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
                 <a
-                  href="../book/book.html"
+                  href="../book/book.php"
                   class="doctors-btn doctors-btn-primary"
                   style="margin-bottom: 0.5rem"
                 >
@@ -729,7 +763,7 @@
             of healthcare.
           </p>
           <div class="cta-actions">
-            <a href="book.html" class="btn book-btn">Book Your Appointment</a>
+            <a href="../book/book.php" class="btn book-btn">Book Your Appointment</a>
             <input class="cta-input" placeholder="Search services or doctors" />
           </div>
 
