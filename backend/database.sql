@@ -33,6 +33,7 @@ CREATE TABLE Appointment (
     reason          VARCHAR(255),
     notes           TEXT,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    prescription_path VARCHAR(255) DEFAULT NULL,
     FOREIGN KEY     (patient_id) REFERENCES Patient(id) ON DELETE CASCADE,
     FOREIGN KEY     (doctor_id) REFERENCES Doctor(id) ON DELETE CASCADE
 );

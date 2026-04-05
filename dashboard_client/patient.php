@@ -123,9 +123,20 @@ try {
             </span>
         </td>
         <td class="text-end">
-            <button class="btn btn-sm btn-outline-primary">View</button>
-            <button class="btn btn-sm btn-outline-secondary">PDF</button>
-        </td>
+    <button class="btn btn-sm btn-outline-primary">View</button>
+    
+    <?php if (!empty($consultation['prescription_path'])): ?>
+        <a href="../uploads/prescriptions/<?= $consultation['prescription_path'] ?>" 
+           class="btn btn-sm btn-outline-danger" 
+           download>
+           PDF
+        </a>
+    <?php else: ?>
+        <button class="btn btn-sm btn-outline-secondary" disabled title="Non disponible">
+           PDF
+        </button>
+    <?php endif; ?>
+</td>
     </tr>
   <?php endforeach; ?>
 </tbody>
