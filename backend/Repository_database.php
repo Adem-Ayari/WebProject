@@ -30,4 +30,25 @@ class Repository_database {
         }
     }
 
+    public function getAllPrescriptionsForDoctor($doctorId) {
+        try {
+            $stmt = $this->db->prepare(" 
+                SELECT 
+                    A.appointment_date AS date_cons,
+                    P.name AS patient_name,
+                    A.reason AS medical_resume,
+                    A.status AS status_cons
+                FROM Appointment A
+                INNER JOIN Patient P ON A.patient_id = P.id
+                WHERE A.doctor_id = ?
+                ORDER BY A.appointment_date DESC
+            ");
+            $stmt->execute([$doctorId]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+
 }

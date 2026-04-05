@@ -64,7 +64,7 @@ header {
 .wrapper {
   position: relative;
   width: 440px;
-  height: 500px;
+  min-height: 500px;
   background: #ffffff;
   border-radius: 24px;
   box-shadow: 0 20px 60px rgba(26, 115, 232, 0.1);
@@ -73,6 +73,10 @@ header {
   align-items: center;
   overflow: hidden;
   transition: height 0.3s ease;
+}
+
+.wrapper.register-mode {
+  min-height: 720px;
 }
 .icon-close {
   position: absolute;
@@ -211,8 +215,74 @@ header {
   display: none;
 }
 
+.wrapper.register-mode .form-box-register {
+  padding-top: 20px;
+  padding-bottom: 30px;
+}
+
 .form-box-register h2 {
   font-size: 28px;
   color: #111;
   text-align: center;
+  margin-bottom: 8px;
+}
+
+.form-box-register .subtitle {
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.form-box-register .input-box,
+.form-box-register .select-box {
+  margin: 10px 0;
+  height: 45px;
+}
+
+.form-box-register .btn-main {
+  margin-top: 8px;
+  height: 44px;
+  font-size: 15px;
+}
+
+.select-box {
+  position: relative;
+  background: #f8faff;
+  border-radius: 12px;
+}
+
+.select-box .form-select {
+  border: none;
+}
+
+.select-box select {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 2px solid transparent;
+  outline: none;
+  font-size: 15px;
+  color: #333;
+  padding: 0 45px 0 15px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: 0.3s;
+  box-shadow: none;
+}
+
+.select-box select:focus {
+  border-color: #1a73e8;
+  background: #fff;
+}
+
+.select-box select:focus ~ label,
+.select-box select:valid ~ label {
+  top: -12px;
+  left: 10px;
+  font-size: 12px;
+  color: #1a73e8;
+  background: #fff;
+  padding: 0 5px;
 }

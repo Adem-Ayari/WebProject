@@ -28,6 +28,14 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
+function passwordMatches($plainPassword, $storedPassword) {
+    if (password_verify($plainPassword, $storedPassword)) {
+        return true;
+    }
+
+    return hash_equals($storedPassword, $plainPassword);
+}
+
 // ──────────── LOGIN LOGIC ──────────── 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
     
@@ -42,17 +50,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
             $error = "Please fill in all fields";
         } else {
             try {
-                // Query database for user
+                // 1) On teste d'abord si l'utilisateur est un docteur
+                $doctorQuery = $db->prepare("SELECT id, password FROM Doctor WHERE email = ?");
+                $doctorQuery->execute([$email]);
+                $doctor = $doctorQuery->fetch(PDO::FETCH_ASSOC);
+
+                if ($doctor && passwordMatches($password, $doctor['password'])) {
+                    $_SESSION['doctor_id'] = $doctor['id'];
+                    $_SESSION['email'] = $email;
+                    $_SESSION['role'] = 'doctor';
+
+                    header("Location: ../prescriptions_dcotor/prescriptions_doctor.php");
+                    exit;
+                }
+
+                // 2) Sinon on teste le patient
                 $query = $db->prepare("SELECT id, password FROM Patient WHERE email = ?");
                 $query->execute([$email]);
                 $user = $query->fetch(PDO::FETCH_ASSOC);
-                
-                if ($user && password_verify($password, $user['password'])) {
-                    // Login successful
+
+                if ($user && passwordMatches($password, $user['password'])) {
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['email'] = $email;
-                    
-                    // Redirect logged-in users to connected homepage
+                    $_SESSION['role'] = 'patient';
+
                     header("Location: ../homepage/index.php");
                     exit;
                 } else {
@@ -76,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
         $email = trim($_POST['Remail']);
         $password = $_POST['Rpassword'];
         $password_confirm = $_POST['Rpassword_confirm'];
+        $role = isset($_POST['Rrole']) ? trim($_POST['Rrole']) : 'patient';
         
         // Validation
         if (empty($full_name) || empty($email) || empty($password)) {
@@ -88,18 +110,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
             $error = "Invalid email format";
         } else {
             try {
-                // Check if email already exists
-                $check_query = $db->prepare("SELECT id FROM Patient WHERE email = ?");
-                $check_query->execute([$email]);
+                // Check if email already exists in both Patient and Doctor tables
+                $check_patient = $db->prepare("SELECT id FROM Patient WHERE email = ?");
+                $check_patient->execute([$email]);
                 
-                if ($check_query->fetch()) {
+                $check_doctor = $db->prepare("SELECT id FROM Doctor WHERE email = ?");
+                $check_doctor->execute([$email]);
+                
+                if ($check_patient->fetch() || $check_doctor->fetch()) {
                     $error = "Email already registered";
                 } else {
                     // Hash password and insert user
                     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
                     
-                    $insert_query = $db->prepare("INSERT INTO Patient (name, email, password) VALUES (?, ?, ?)");
-                    $insert_query->execute([$full_name, $email, $hashed_password]);
+                    if ($role === 'doctor') {
+                        // Create doctor account with default values for required fields
+                        $license_number = 'LIC-' . bin2hex(random_bytes(6));
+                        $insert_query = $db->prepare("INSERT INTO Doctor (name, email, password, phone, specialization, license_number) VALUES (?, ?, ?, ?, ?, ?)");
+                        $insert_query->execute([$full_name, $email, $hashed_password, 'TBD', 'General', $license_number]);
+                    } else {
+                        // Create patient account
+                        $insert_query = $db->prepare("INSERT INTO Patient (name, email, password) VALUES (?, ?, ?)");
+                        $insert_query->execute([$full_name, $email, $hashed_password]);
+                    }
                     
                     $success = "Account created! You can now login.";
                 }
@@ -209,6 +242,15 @@ if (isset($_POST['show_register'])) {
                     <input type="password" name="Rpassword" required />
                     <label>Password (min. 8 characters)</label>
                     <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
+                </div>
+                <div class="input-box select-box">
+                    <select class="form-select" name="Rrole" required>
+                        <option value="" selected disabled hidden></option>
+                        <option value="patient">Patient</option>
+                        <option value="doctor">Doctor</option>
+                    </select>
+                    <label>Choose your role</label>
+                    <span class="icon"><ion-icon name="chevron-down-outline"></ion-icon></span>
                 </div>
 
                 <div class="input-box">

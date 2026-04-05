@@ -1,33 +1,42 @@
-const prescriptions = [
-    {
-        date: "07/10/2023",
-        patient: "John Doe",
-        Medical_resume: "Bacterial Infection",
-        status: "Active"
-    },
-    {
-        date: "12/09/2023",
-        patient: "Jane Doe",
-        Medical_resume: "Viral Infection",
-        status: "Complete"
-    }
-];
+$(document).ready(function () {
+    var table = $('#prescriptionTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+        },
+        order: [[0, 'desc']],
+        pageLength: 7,
+        dom: 'lrtip',
+        columnDefs: [
+            { orderable: false, targets: 4 }
+        ]
+    });
 
-function loadPrescription(){
-    const prescriptionList = document.querySelector(".prescription_data");
-    prescriptionList.innerHTML="";
-    prescriptions.forEach(item=>{
-        const row=`<tr>
-        <td>${item.date}</td>
-        <td>${item.patient}</td>
-        <td>${item.Medical_resume}</td>
-        <td>${item.status}</td>
-        <td class="text-end">
-            <button class="btn btn-sm btn-secondary">Send PDF</button>
-        </td>
-        </tr>`;
-        prescriptionList.innerHTML+=row;
-    })
+    $.fn.dataTable.ext.search.push(function (settings, data) {
+        if (settings.nTable.id !== 'prescriptionTable') {
+            return true;
+        }
 
-}
-document.addEventListener("DOMContentLoaded",loadPrescription);
+        var min = $('#minDate').val();
+        var max = $('#maxDate').val();
+        var dateCol = data[0] || '';
+
+        if (
+            (min === '' && max === '') ||
+            (min === '' && dateCol <= max) ||
+            (min <= dateCol && max === '') ||
+            (min <= dateCol && dateCol <= max)
+        ) {
+            return true;
+        }
+
+        return false;
+    });
+
+    $('#btnFilter').on('click', function () {
+        table.draw();
+    });
+
+    $('#patientSearch').on('keyup change', function () {
+        table.column(1).search(this.value).draw();
+    });
+});
