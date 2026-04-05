@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
                     $_SESSION['email'] = $email;
                     
                     // Redirect logged-in users to connected homepage
-                    header("Location: ../homepage/connected.php");
+                    header("Location: ../homepage/index.php");
                     exit;
                 } else {
                     $error = "Invalid email or password";

@@ -5,84 +5,174 @@ if (empty($_SESSION['user_id'])) {
   header('Location: ../login_signup/login-register.php?force_login=1');
   exit;
 }
+// ... début du fichier ...
+try {
+    require_once '../backend/autoloader.php';
+    $repo = new Repository_database();
+    
+    // On récupère les données
+    $result = $repo->getAllAppointmentsForPatient($_SESSION['user_id']);
+    
+    // FORCE le type tableau même si le repo renvoie null par erreur
+    $consultations = is_array($result) ? $result : [];
+    
+} catch (Exception $e) {
+    $consultations = []; // Sécurité en cas d'exception
+    $error_db = $e->getMessage();
+}
 ?>
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <title>TeleMed | Online Healthcare</title>
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    
     <link rel="stylesheet" href="patient.css" />
     <script src="patient.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  </head>
+</head>
 
-  <body>
+<body>
     <div class="body">
-      <!-- navbar -->
-      <header class="navbar">
-        <div class="logo">
-          Health
-          <span>Connect</span>
-        </div>
-        <nav class="nav-links">
-          <a href="../homepage/connected.php">Home</a>
-        </nav>
-
-        <div class="nav-actions">
-          <a href="../login_signup/login-register.php?force_login=1" class="signin">Sign In</a>
-          <a href="../book/book.php" class="btn">Book Appointment</a>
-        </div>
-      </header>
-      <!-- historique des consultations-->
-        <div class="container mt-5">
-          <div class="card shadow-sm">
-            <div class="card-header bg-white">
-              <h3>Consultation History & Past Care Plans</h3>
+        <header class="navbar">
+            <div class="logo">Health <span>Connect</span></div>
+            <nav class="nav-links">
+                <a href="../homepage/index.php">Home</a>
+            </nav>
+            <div class="nav-actions">
+                <a href="../login_signup/login-register.php?force_login=1" class="signin">Sign In</a>
+                <a href="../book/book.php" class="btn">Book Appointment</a>
             </div>
-            <div class="card-body">
+        </header>
+
+        <div class="container mt-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h3>Consultation History & Past Care Plans</h3>
+                </div>
                 <div class="card-body">
-      <div class="row g-2 mb-3">
-        <div class="col-md-4">
-          <input type="text" class="form-control" placeholder="Filter by name...">
-        </div>
-        <div class="col-md-2">
-          <select class="form-select">
-            <option selected>Filters</option>
-          </select>
-        </div>
-      </div>
-      <div class="table-responsive">
-  <table class="table tabel-hover align-middle">
-    <thead class="table-light">
-      <tr>
-        <th>Date</th>
-        <th>Type</th>
-        <th>Doctor</th>
-        <th>status</th>
-      </tr>
-    </thead>
-    <tbody class="prescription_data">
+                    <div class="row g-3 mb-4 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Rechercher par nom du docteur :</label>
+                            <input type="text" id="doctorSearch" class="form-control" placeholder="Ex: Wilson">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Date de début :</label>
+                            <input type="date" id="minDate" class="form-control">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">Date de fin :</label>
+                            <input type="date" id="maxDate" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                            <button id="btnFilter" class="btn btn-primary w-100">Filtrer par date</button>
+                        </div>
+                    </div>
+
+                  <div class="table-responsive p-3">
+                        <table id="consultationTable" class="table table-hover align-middle" style="width:100%">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Doctor</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+  <?php foreach ($consultations as $consultation): ?>
     <tr>
-        <td>07/10/2023</td>
-        <td>Rx</td>
-        <td>Dr.Smith</td>
-        <td>Medical prescription</td>
+        <td><?= htmlspecialchars($consultation['date_cons']) ?></td>
+        <td><?= htmlspecialchars($consultation['type_cons']) ?></td>
+        <td><?= htmlspecialchars($consultation['doctor_name']) ?></td>
+        <td>
+            <?php 
+            $status = $consultation['status_cons'];
+            $badgeClass = 'bg-secondary'; 
+
+            switch($status) {
+                case 'Completed':
+                    $badgeClass = 'bg-success'; 
+                    break;
+                case 'Scheduled':
+                    $badgeClass = 'bg-primary'; 
+                    break;
+                case 'Cancelled':
+                case 'Canceled':
+                    $badgeClass = 'bg-danger';  
+                    break;
+                case 'No-Show':
+                    $badgeClass = 'bg-warning text-dark'; 
+                    break;
+            }
+            ?>
+            <span class="badge <?php echo $badgeClass; ?>">
+                <?php echo htmlspecialchars($status); ?>
+            </span>
+        </td>
         <td class="text-end">
-            <button class="btn btn-sm btn-primary">View Details</button>
-            <button class="btn btn-sm btn-secondary">Download PDF</button>
+            <button class="btn btn-sm btn-outline-primary">View</button>
+            <button class="btn btn-sm btn-outline-secondary">PDF</button>
         </td>
     </tr>
-    </tbody>
- </table>
-</div>
+  <?php endforeach; ?>
+</tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    </div>
-    </div>
-  </body>   
+
+    <script>
+    $(document).ready(function() {
+        var table = $('#consultationTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+            },
+            "order": [[ 0, "desc" ]],
+            "pageLength": 7,
+            "dom": 'rtip', 
+            "columnDefs": [
+                { "orderable": false, "targets": 4 }
+            ]
+        });
+        $.fn.dataTable.ext.search.push(
+            function(settings, data, dataIndex) {
+                var min = $('#minDate').val();
+                var max = $('#maxDate').val();
+                var dateCol = data[0];
+
+                if (
+                    (min === "" && max === "") ||
+                    (min === "" && dateCol <= max) ||
+                    (min <= dateCol && max === "") ||
+                    (min <= dateCol && dateCol <= max)
+                ) {
+                    return true;
+                }
+                return false;
+            }
+        );
+        $('#btnFilter').on('click', function() {
+            table.draw();
+        });
+        $('#doctorSearch').on('keyup change', function() {
+            table.column(2).search(this.value).draw();
+        });
+    });
+    </script>
+</body>
 </html>

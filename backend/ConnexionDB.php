@@ -2,10 +2,10 @@
 class ConnexionBD
 
  {
-        private static $_dbname = "";                       // Set your database name here
-        private static $_user = "";                         // Set your database username here
+        private static $_dbname = "dbproject";                       // Set your database name here
+        private static $_user = "root";                         // Set your database username here
         private static $_pwd = "";                          // Set your database password here
-        private static $_host = "";                         // Set your database host here
+        private static $_host = "localhost";                         // Set your database host here
         private static $_bdd = null;
         private function __construct()
 
