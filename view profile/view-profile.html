@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Doctor Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="view-profile.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">Health <span>Connect</span></div>
+      <nav class="navigation">
+        <a href="../homepage/index.html" class="btn-home">Home</a>
+      </nav>
+    </header>
+
+    <section class="profile-section">
+      <div class="profile-container">
+        <div class="profile-left">
+          <img id="doctorImg" class="doctor-img" alt="Doctor" />
+          <div class="rating-box">
+            <span id="doctorDescription" class="description"></span>
+          </div>
+          <a href="../book/book.php">
+          <button class="btn-main">Book Appointment</button>
+          </a>
+        </div>
+        <div class="profile-right">
+          <h1 id="doctorName"></h1>
+          <h3 class="specialty" id="doctorSpecialty"></h3>
+          <p class="rating" id="doctorRating"></p>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <h4>Experience</h4>
+              <p id="doctorExperience"></p>
+            </div>
+            <div class="info-item">
+              <h4>Consultation Fee</h4>
+              <p id="doctorFee"></p>
+            </div>
+            <div class="info-item">
+              <h4>Next Available</h4>
+              <p id="doctorNext"></p>
+            </div>
+            <div class="info-item">
+              <h4>Hospital</h4>
+              <p id="doctorHospital"></p>
+            </div>
+          </div>
+
+          <div class="about-section">
+            <h2>About Doctor</h2>
+            <p id="doctorAbout"></p>
+          </div>
+          <div class="info-item contact-item">
+            <span id="doctorEmail"></span>
+            <span id="doctorPhone"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      import { doctors } from "./doctor-data.js";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const doctorId = parseInt(urlParams.get("id"));
+
+      const doctor = doctors.find((d) => d.id === doctorId);
+
+      if (doctor) {
+        document.getElementById("doctorImg").src = doctor.image;
+        document.getElementById("doctorImg").alt = doctor.name;
+        document.getElementById("doctorName").innerText = doctor.name;
+        document.getElementById("doctorSpecialty").innerText = doctor.specialty;
+        document.getElementById("doctorRating").innerText = `★ ${doctor.rating} (${doctor.reviews} reviews)`;
+        document.getElementById("doctorDescription").innerText = doctor.description;
+        document.getElementById("doctorExperience").innerText = doctor.experience;
+        document.getElementById("doctorFee").innerText = doctor.fee;
+        document.getElementById("doctorNext").innerText = doctor.nextAvailable;
+        document.getElementById("doctorHospital").innerText = doctor.hospital;
+        document.getElementById("doctorAbout").innerText = doctor.about;
+        document.getElementById("doctorPhone").innerText = doctor.contact.phone;
+        document.getElementById("doctorEmail").innerText = doctor.contact.email;
+      } else {
+        document.body.innerHTML = "<h1>Doctor not found</h1>";
+      }
+    </script>
+  </body>
+</html>

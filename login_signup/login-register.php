@@ -1,0 +1,231 @@
+<?php
+session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+try {
+    include '../backend/ConnexionDB.php';
+    $db = ConnexionBD::getInstance();
+    
+    if (!$db) {
+        throw new Exception("Failed to get database connection");
+    }
+} catch (PDOException $e) {
+    echo "Database Error: " . $e->getMessage();
+    exit;
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage();
+    exit;
+}
+
+// Initialize variables
+$showRegisterForm = false;
+$error = '';
+$success = '';
+
+// Create CSRF token if not exists
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+// ──────────── LOGIN LOGIC ──────────── 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
+    
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        $error = "Invalid security token";
+    } else {
+        $email = trim($_POST['email']);
+        $password = $_POST['password'];
+        
+        if (empty($email) || empty($password)) {
+            $error = "Please fill in all fields";
+        } else {
+            try {
+                // Query database for user
+                $query = $db->prepare("SELECT id, password FROM Patient WHERE email = ?");
+                $query->execute([$email]);
+                $user = $query->fetch(PDO::FETCH_ASSOC);
+                
+                if ($user && password_verify($password, $user['password'])) {
+                    // Login successful
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['email'] = $email;
+                    
+                    // Redirect logged-in users to connected homepage
+                    header("Location: ../homepage/connected.php");
+                    exit;
+                } else {
+                    $error = "Invalid email or password";
+                }
+            } catch (PDOException $e) {
+                $error = "Database error: " . $e->getMessage();
+            }
+        }
+    }
+}
+
+// ──────────── REGISTER LOGIC ──────────── 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_submit'])) {
+    
+    // Verify CSRF token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+        $error = "Invalid security token";
+    } else {
+        $full_name = trim($_POST['Rfull_name']);
+        $email = trim($_POST['Remail']);
+        $password = $_POST['Rpassword'];
+        $password_confirm = $_POST['Rpassword_confirm'];
+        
+        // Validation
+        if (empty($full_name) || empty($email) || empty($password)) {
+            $error = "Please fill in all fields";
+        } elseif (strlen($password) < 8) {
+            $error = "Password must be at least 8 characters";
+        } elseif ($password !== $password_confirm) {
+            $error = "Passwords do not match";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = "Invalid email format";
+        } else {
+            try {
+                // Check if email already exists
+                $check_query = $db->prepare("SELECT id FROM Patient WHERE email = ?");
+                $check_query->execute([$email]);
+                
+                if ($check_query->fetch()) {
+                    $error = "Email already registered";
+                } else {
+                    // Hash password and insert user
+                    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+                    
+                    $insert_query = $db->prepare("INSERT INTO Patient (name, email, password) VALUES (?, ?, ?)");
+                    $insert_query->execute([$full_name, $email, $hashed_password]);
+                    
+                    $success = "Account created! You can now login.";
+                }
+            } catch (PDOException $e) {
+                $error = "Database error: " . $e->getMessage();
+            }
+        }
+    }
+}
+
+// Show register form if user clicked register
+if (isset($_POST['show_register'])) {
+    $showRegisterForm = true;
+}
+?>
+
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthConnect - Connexion</title>
+    <link rel="stylesheet" href="login-signup.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="Login-register.js" defer></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+    <header>
+        <h2 class="logo">
+            Health
+            <span>Connect</span>
+        </h2>
+        <nav class="navigation">
+            <a href="../homepage/index.html" class="btn-home">Home</a>
+        </nav>
+    </header>
+
+    <div class="wrapper">
+        <!-- ──────────── LOGIN FORM ──────────── -->
+        <div class="form-box-login" style="<?php echo $showRegisterForm ? 'display:none;' : 'display:block;' ?>">
+            <h2>Welcome Back</h2>
+            <p class="subtitle">Enter your details to access your account</p>
+
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
+
+            <?php if (!empty($success)): ?>
+                <div class="alert alert-success" role="alert"><?php echo htmlspecialchars($success); ?></div>
+            <?php endif; ?>
+
+            <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+
+                <div class="input-box">
+                    <input type="email" name="email" required />
+                    <label>Email Address</label>
+                    <span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
+                </div>
+
+                <div class="input-box">
+                    <input type="password" name="password" required />
+                    <label>Password</label>
+                    <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
+                </div>
+
+                <div class="remember-forgot">
+                    <label>
+                        <input type="checkbox" name="remember" />
+                        Remember me
+                    </label>
+                    <a href="forgot-password.php">Forgot Password?</a>
+                </div>
+
+                <button type="submit" name="login_submit" class="btn-main">Login</button>
+                <div class="login-register">
+                    <p>
+                        Don't have an account?
+                        <a href="#" class="register_link">Register here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- ──────────── REGISTER FORM ──────────── -->
+        <div class="form-box-register" style="<?php echo $showRegisterForm ? 'display:block;' : 'display:none;' ?>">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join our community of healthy patients</p>
+            <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+
+                <div class="input-box">
+                    <input type="text" name="Rfull_name" required />
+                    <label>Full Name</label>
+                    <span class="icon"><ion-icon name="person-outline"></ion-icon></span>
+                </div>
+
+                <div class="input-box">
+                    <input type="email" name="Remail" required />
+                    <label>Email Address</label>
+                    <span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
+                </div>
+
+                <div class="input-box">
+                    <input type="password" name="Rpassword" required />
+                    <label>Password (min. 8 characters)</label>
+                    <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
+                </div>
+
+                <div class="input-box">
+                    <input type="password" name="Rpassword_confirm" required />
+                    <label>Confirm Password</label>
+                    <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
+                </div>
+
+                <button type="submit" name="register_submit" class="btn-main">Register</button>
+                <div class="login-register">
+                    <p>
+                        Already have an account?
+                        <a href="#" class="login_link">Login here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

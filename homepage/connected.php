@@ -1,11 +1,45 @@
+<?php
+session_start();
+
+if (empty($_SESSION['user_id'])) {
+  header('Location: ../login_signup/login-register.php?force_login=1');
+  exit;
+}
+
+if (empty($_SESSION['csrf_token'])) {
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
+  if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    http_response_code(400);
+    exit('Invalid request');
+  }
+
+  $_SESSION = [];
+
+  if (ini_get('session.use_cookies')) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+  }
+
+  session_destroy();
+  header('Location: index.php');
+  exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <title>TeleMed | Online Healthcare</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
     <script src="index.js" defer></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
@@ -15,8 +49,12 @@
       <span class="loading">Health Connect</span>
     </div>
     <div class="body">
+      <!-- navbar -->
       <header class="navbar">
-        <div class="logo">Health<span>Connect</span></div>
+        <div class="logo">
+          Health
+          <span>Connect</span>
+        </div>
         <nav class="nav-links">
           <a href="#services">Services</a>
           <a href="#howitworks">How It Works</a>
@@ -25,18 +63,22 @@
         </nav>
 
         <div class="nav-actions">
-          <a href="#signin" class="signin">Sign In</a>
-          <a href="#bookappointment" class="btn">Book Appointment</a>
+          <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
+            <button type="submit" name="logout_submit" class="signin">Logout</button>
+          </form>
+          <a href="../dashboard_client/patient.php" class="btn">Dashboard</a>
+          <a href="../book/book.php" class="btn">Book Appointment</a>
         </div>
       </header>
 
-      <!-- medali -->
       <!-- medali -->
       <section class="hero">
         <div class="hero-wrapper">
           <div class="hero-text">
             <h1>
-              Quality Healthcare,<br />
+              Quality Healthcare,
+              <br />
               <span>Anywhere</span>
             </h1>
             <p>
@@ -45,7 +87,7 @@
               anytime you need.
             </p>
             <div class="hero-buttons">
-              <a href="#book" class="btn-primary">
+              <a href="../book/book.php" class="btn-primary">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -100,7 +142,6 @@
               alt="Online Consultation"
             />
             <div class="hero-badges-container">
-              <!-- Badge 1 -->
               <div class="hero-badge-1">
                 <div class="badge-icon" style="background: #f12b48">
                   <svg
@@ -164,7 +205,6 @@
         </div>
       </section>
 
-      <!-- ahmed -->
       <!-- ahmed -->
       <section class="services" id="services">
         <div class="services-header">
@@ -349,82 +389,97 @@
       </section>
 
       <!-- adem -->
-      <!-- adem -->
       <section class="how-it-works" id="howitworks">
         <h2>How it works</h2>
         <h4>
           Getting started with HealthConnect is simple. Follow these easy steps
-          to access quality <br />
+          to access quality
+          <br />
           healthcare.
         </h4>
         <div class="schema-wrapper">
           <hr />
           <div class="howitworks-wrapper">
             <div class="step">
-              <img src="photos/user+1.png" class="step-img" alt="" />
+              <img src="../photos/user+1.png" class="step-img" alt="" />
               <div><span>1</span></div>
             </div>
             <div class="step">
-              <img src="photos/calendar.png" class="step-img" alt="" />
+              <img src="../photos/calendar.png" class="step-img" alt="" />
               <div><span>2</span></div>
             </div>
             <div class="step">
-              <img src="photos/videocamera.png" class="step-img" alt="" />
+              <img src="../photos/videocamera.png" class="step-img" alt="" />
               <div><span>3</span></div>
             </div>
             <div class="step">
-              <img src="photos/done_tasks.png" class="step-img" alt="" />
+              <img src="../photos/done_tasks.png" class="step-img" alt="" />
               <div><span>4</span></div>
             </div>
           </div>
         </div>
         <div class="text-wrapper">
           <div class="text-step">
-            <span style="font-size: 20px"
-              ><b>Create Account <br /> </b
-            ></span>
+            <span style="font-size: 20px">
+              <b>
+                Create Account
+                <br />
+              </b>
+            </span>
             <br />
-            <span style="color: #ccc"
-              >Sign up in minutes with your basic information<br />
-              and verify your identity.</span
-            >
+            <span style="color: #ccc">
+              Sign up in minutes with your basic information
+              <br />
+              and verify your identity.
+            </span>
           </div>
           <div class="text-step">
-            <span style="font-size: 20px"
-              ><b>Book Appointment <br /> </b
-            ></span>
+            <span style="font-size: 20px">
+              <b>
+                Book Appointment
+                <br />
+              </b>
+            </span>
             <br />
-            <span style="color: #ccc"
-              >Choose your preferred doctor, specialty, and <br />
-              time slot that works for you.</span
-            >
+            <span style="color: #ccc">
+              Choose your preferred doctor, specialty, and
+              <br />
+              time slot that works for you.
+            </span>
           </div>
           <div class="text-step">
-            <span style="font-size: 20px"
-              ><b> Attend Consultation <br /></b
-            ></span>
+            <span style="font-size: 20px">
+              <b>
+                Attend Consultation
+                <br />
+              </b>
+            </span>
             <br />
-            <span style="color: #ccc"
-              >join the video call at your scheduled time and <br />
-              discuss your health concerns.</span
-            >
+            <span style="color: #ccc">
+              join the video call at your scheduled time and
+              <br />
+              discuss your health concerns.
+            </span>
           </div>
           <div class="text-step">
-            <span style="font-size: 20px"
-              ><b> Receive Care Plan <br /></b
-            ></span>
+            <span style="font-size: 20px">
+              <b>
+                Receive Care Plan
+                <br />
+              </b>
+            </span>
             <br />
-            <span style="color: #ccc"
-              >Get your prescriptions, medical advice, and <br />follow-up
-              instructions instantly.</span
-            >
+            <span style="color: #ccc">
+              Get your prescriptions, medical advice, and
+              <br />
+              follow-up instructions instantly.
+            </span>
           </div>
         </div>
       </section>
 
       <!-- souhayl -->
       <section class="our-doctors" id="doctors">
-        <!-- Header -->
         <div style="text-align: center; margin-bottom: 40px">
           <h2 style="color: #0a6cff; font-size: 32px; margin-bottom: 10px">
             Meet Our Specialists
@@ -435,7 +490,6 @@
         </div>
 
         <div class="doctors-container">
-          <!-- Sidebar -->
           <div class="doctors-sidebar">
             <div class="doctors-card">
               <h5
@@ -473,8 +527,9 @@
                   <label
                     for="check1"
                     style="display: inline; font-weight: normal"
-                    >Available Today</label
                   >
+                    Available Today
+                  </label>
                 </div>
               </div>
 
@@ -487,9 +542,7 @@
             </div>
           </div>
 
-          <!-- Doctor Grid -->
           <div class="doctors-grid">
-            <!-- Card 1 -->
             <div class="doctors-card doctors-hover">
               <img
                 src="https://placehold.co/400x300"
@@ -535,24 +588,30 @@
                 </p>
 
                 <div class="doctors-info-box">
-                  <span>Next: <b>Today, 2PM</b></span>
-                  <span>Fee: <b>$75</b></span>
+                  <span>
+                    Next:
+                    <b>Today, 2PM</b>
+                  </span>
+                  <span>
+                    Fee:
+                    <b>$75</b>
+                  </span>
                 </div>
               </div>
               <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
                 <a
-                  href="#"
+                  href="../book/book.php"
                   class="doctors-btn doctors-btn-primary"
                   style="margin-bottom: 0.5rem"
-                  >Book Now</a
                 >
-                <a href="#" class="doctors-btn doctors-btn-outline"
+                  Book Now
+                </a>
+                <a href="../view profile/view-profile.html?id=1" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>
             </div>
 
-            <!-- Card 2 -->
             <div class="doctors-card doctors-hover">
               <img
                 src="https://placehold.co/400x300"
@@ -598,24 +657,30 @@
                 </p>
 
                 <div class="doctors-info-box">
-                  <span>Next: <b>Tomorrow</b></span>
-                  <span>Fee: <b>$60</b></span>
+                  <span>
+                    Next:
+                    <b>Tomorrow</b>
+                  </span>
+                  <span>
+                    Fee:
+                    <b>$60</b>
+                  </span>
                 </div>
               </div>
               <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
                 <a
-                  href="#"
+                  href="../book/book.php"
                   class="doctors-btn doctors-btn-primary"
                   style="margin-bottom: 0.5rem"
-                  >Book Now</a
                 >
-                <a href="#" class="doctors-btn doctors-btn-outline"
+                  Book Now
+                </a>
+                <a href="../view profile/view-profile.html?id=2" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>
             </div>
 
-            <!-- Card 3 -->
             <div class="doctors-card doctors-hover">
               <img
                 src="https://placehold.co/400x300"
@@ -661,18 +726,25 @@
                 </p>
 
                 <div class="doctors-info-box">
-                  <span>Next: <b>Today, 4PM</b></span>
-                  <span>Fee: <b>$90</b></span>
+                  <span>
+                    Next:
+                    <b>Today, 4PM</b>
+                  </span>
+                  <span>
+                    Fee:
+                    <b>$90</b>
+                  </span>
                 </div>
               </div>
               <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
                 <a
-                  href="#"
+                  href="../book/book.php"
                   class="doctors-btn doctors-btn-primary"
                   style="margin-bottom: 0.5rem"
-                  >Book Now</a
                 >
-                <a href="#" class="doctors-btn doctors-btn-outline"
+                  Book Now
+                </a>
+                <a href="../view profile/view-profile.html?id=3" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>
@@ -691,7 +763,7 @@
             of healthcare.
           </p>
           <div class="cta-actions">
-            <button class="btn book-btn">Book Your Appointment</button>
+            <a href="../book/book.php" class="btn book-btn">Book Your Appointment</a>
             <input class="cta-input" placeholder="Search services or doctors" />
           </div>
 
@@ -747,9 +819,13 @@
           </div>
           <div class="footer-column contact">
             <h4>Contact</h4>
-            <p>support@healthconnect.example</p>
-            <p>*phone number*</p>
-            <p>123 Health Ave, Suite 10<br />Healthcare City, HC 12345</p>
+            <p>support@healthconnect.com</p>
+            <p>93 248 372</p>
+            <p>
+              123 Health Ave, Suite 10
+              <br />
+              Healthcare City, HC 12345
+            </p>
           </div>
         </div>
       </section>
