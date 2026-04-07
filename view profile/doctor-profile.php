@@ -19,10 +19,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
     $consultation_fee = trim($_POST['consultation_fee']);
     $hospital = trim($_POST['hospital']);
     $phone = trim($_POST['phone']);
+    $email = trim($_POST['email']);
     $about = trim($_POST['about']);
     
-    $updateStmt = $db->prepare("UPDATE Doctor SET name = ?, specialization = ?, experience = ?, consultation_fee = ?, hospital = ?, phone = ?, about = ? WHERE id = ?");
-    if($updateStmt->execute([$name, $specialization, $experience, $consultation_fee, $hospital, $phone, $about, $doctor_id])) {
+    $updateStmt = $db->prepare("UPDATE Doctor SET name = ?, specialization = ?, experience = ?, consultation_fee = ?, hospital = ?, phone = ?, email = ?, about = ? WHERE id = ?");
+    if($updateStmt->execute([$name, $specialization, $experience, $consultation_fee, $hospital, $phone, $email, $about, $doctor_id])) {
         $success_msg = "Profile updated successfully!";
     } else {
         $error_msg = "Failed to update profile.";
@@ -137,6 +138,10 @@ $placeholderImage = "https://img.freepik.com/free-photo/female-doctor-hospital-w
           <div class="form-group">
             <label>Phone</label>
             <input type="text" name="phone" value="<?= htmlspecialchars($doctor['phone']) ?>" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" name="email" value="<?= htmlspecialchars($doctor['email']) ?>" required>
           </div>
           <div class="form-group">
             <label>About</label>
