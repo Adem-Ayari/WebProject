@@ -6,7 +6,7 @@ try {
     include 'ConnexionDB.php';
     
     // Get database connection
-    $db = ConnexionBD::getInstance();
+    $db = ConnexionDB::getInstance();
     
     if (!$db) {
         throw new Exception("Failed to get database connection");

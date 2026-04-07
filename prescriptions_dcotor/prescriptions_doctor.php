@@ -13,6 +13,12 @@ try {
     $doctorId = !empty($_SESSION['doctor_id']) ? (int) $_SESSION['doctor_id'] : (int) $_SESSION['user_id'];
     $result = $repo->getAllPrescriptionsForDoctor($doctorId);
     $prescriptions = is_array($result) ? $result : [];
+
+    $db = ConnexionDB::getInstance();
+    $stmt = $db->prepare("SELECT name FROM Doctor WHERE id = ?");
+    $stmt->execute([$doctorId]);
+    $doctorData = $stmt->fetch(PDO::FETCH_ASSOC);
+    $doctorName = $doctorData ? $doctorData['name'] : 'Doctor';
 } catch (Exception $e) {
     $prescriptions = [];
     $error_db = $e->getMessage();
@@ -42,11 +48,15 @@ try {
           <span>Connect</span>
         </div>
         <nav class="nav-links">
-          <a href="../homepage/index.php">Home</a>
+          <a href="../homepage/connected.php">Home</a>
         </nav>
 
         <div class="nav-actions">
-          <a href="../login_signup/login-register.php?force_login=1" class="signin">Sign In</a>
+          <a href="../view profile/doctor-profile.php" class="profile-account me-3">
+            <img src="https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827774.jpg" alt="Profile" class="profile-avatar">
+            <span class="profile-name"><?= htmlspecialchars($doctorName) ?></span>
+          </a>
+          <a href="../login_signup/logout.php" class="btn-logout">Logout</a>
           <a href="../book/book.php" class="btn">Calendar</a>
         </div>
       </header>

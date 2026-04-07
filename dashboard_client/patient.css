@@ -1,12 +1,12 @@
 @font-face {
-  font-family: "Orbitron";
-  src: url(./fonts/Orbitron-Black.ttf) format("truetype");
+  font-family: 'Orbitron';
+  src: url(./fonts/Orbitron-Black.ttf) format('truetype');
 }
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", "Tahoma", "Geneva", Verdana, sans-serif;
+  font-family: 'Segoe UI', 'Tahoma', 'Geneva', Verdana, sans-serif;
 }
 .navbar {
   display: flex;
@@ -54,56 +54,54 @@
 .btn:hover {
   background-color: #084fc4;
 }
-.card{
-    border:none;
-    border-radius:15px;
-    overflow:hidden;
-    box-shadow: 2px 8px #0a6cff;
+.card {
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 2px 8px #0a6cff;
 }
-.card-header h3{
-    font: size 1.25em;
-    font-weight:700;
-    color:#0a6cff;
-    margin:10px 0;
+.card-header h3 {
+  font: size 1.25em;
+  font-weight: 700;
+  color: #0a6cff;
+  margin: 10px 0;
 }
-.table thead.table-light th{
-    background-color:#f8f9fa;
-    border-bottom:2px solid #edf2f7;
-    color:#718096;
-    fotns-ize:0.875rem;
-    text-transform:uppercase;
-    letter-spacing:0.05em;
-    padding:15px;
+.table thead.table-light th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #edf2f7;
+  color: #718096;
+  fotns-ize: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 15px;
 }
-.table tbody tr:hover{
-    background-color:#f1f5f9;
+.table tbody tr:hover {
+  background-color: #f1f5f9;
 }
-.table tbody td{
-    padding:15px;
+.table tbody td {
+  padding: 15px;
 }
-.btn-primary{
-    background-color:#0a6cff;
-    border:none;
-    border-radius:6px;
-    padding:6px 14px;
+.btn-primary {
+  background-color: #0a6cff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
 }
-.btn-primary:hover{
-    background-color:#084fc4;
+.btn-primary:hover {
+  background-color: #084fc4;
 }
-.btn-secondary{
-    background-color:#0a6cff;
-    border:none;
-    border-radius:6px;
-    padding:6px 14px;
+.btn-secondary {
+  background-color: #0a6cff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
 }
-.btn-secondary:hover{
-    background-color:#084fc4;
+.btn-secondary:hover {
+  background-color: #084fc4;
 }
-.form-control ,
-.form-select{
-    border:1px solid #e0e0e0;
-    border-radius:6px;
-    padding:10px;
+.form-control,
+.form-select {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 10px;
 }
-
-

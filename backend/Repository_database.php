@@ -4,7 +4,7 @@ class Repository_database {
     private $db;
 
     public function __construct() {
-        $this->db = ConnexionBD::getInstance();
+        $this->db = ConnexionDB::getInstance();
     }
     // creer le repository pour la base de donnees (une classe qui va faire toutes les requetes a la base de donnees)
     // Example method to get all appointments for a specific patient

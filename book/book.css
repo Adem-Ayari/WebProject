@@ -1,6 +1,6 @@
 @font-face {
-  font-family: "Orbitron";
-  src: url(./fonts/Orbitron-Black.ttf) format("truetype");
+  font-family: 'Orbitron';
+  src: url(./fonts/Orbitron-Black.ttf) format('truetype');
 }
 
 * {
@@ -10,7 +10,7 @@
 }
 
 body {
-  font-family: "Arial", sans-serif;
+  font-family: 'Arial', sans-serif;
   background: #f8faff;
   display: flex;
   justify-content: center;
@@ -193,14 +193,14 @@ header {
 }
 
 /* Hide date/time text only when empty */
-input[type="date"]:not(:focus):invalid,
-input[type="time"]:not(:focus):invalid {
+input[type='date']:not(:focus):invalid,
+input[type='time']:not(:focus):invalid {
   color: transparent;
 }
 
 /* Hide native calendar & time icon (Chrome, Edge, Safari) */
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='time']::-webkit-calendar-picker-indicator {
   opacity: 0;
   display: none;
 }

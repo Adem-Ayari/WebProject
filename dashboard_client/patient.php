@@ -51,7 +51,7 @@ try {
                 <a href="../homepage/index.php">Home</a>
             </nav>
             <div class="nav-actions">
-                <a href="../login_signup/login-register.php?force_login=1" class="signin">Sign In</a>
+                <a href="../login_signup/logout.php" class="signin text-danger fw-bold">Logout</a>
                 <a href="../book/book.php" class="btn">Book Appointment</a>
             </div>
         </header>

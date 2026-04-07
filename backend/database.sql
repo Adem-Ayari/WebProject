@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS DBProject;
 create database if not exists DBProject;
 use DBProject;
 
@@ -19,6 +20,12 @@ CREATE TABLE Doctor (
     phone           VARCHAR(15) NOT NULL,
     specialization  VARCHAR(100) NOT NULL,
     license_number  VARCHAR(50) UNIQUE NOT NULL,
+    experience      VARCHAR(50) DEFAULT '0 Years',
+    consultation_fee VARCHAR(50) DEFAULT '$0',
+    hospital        VARCHAR(100) DEFAULT 'Not specified',
+    about           TEXT,
+    rating          DECIMAL(2,1) DEFAULT 0.0,
+    reviews         INT DEFAULT 0,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -47,12 +54,12 @@ INSERT INTO Patient (name, email) VALUES
 ('Emma Davis', 'emma.davis@email.com');
 
 -- Sample Data for Doctor Table
-INSERT INTO Doctor (name, email, phone, specialization, license_number) VALUES
-('Dr. James Wilson', 'james.wilson@hospital.com', '555-1001', 'Cardiology', 'LIC-2024-001'),
-('Dr. Sarah Martinez', 'sarah.martinez@hospital.com', '555-1002', 'Neurology', 'LIC-2024-002'),
-('Dr. Michael Lee', 'michael.lee@hospital.com', '555-1003', 'Orthopedics', 'LIC-2024-003'),
-('Dr. Jennifer Taylor', 'jennifer.taylor@hospital.com', '555-1004', 'Dermatology', 'LIC-2024-004'),
-('Dr. Christopher Anderson', 'chris.anderson@hospital.com', '555-1005', 'Pediatrics', 'LIC-2024-005');
+INSERT INTO Doctor (name, email, phone, specialization, license_number, experience, consultation_fee, hospital, about, rating, reviews) VALUES
+('Dr. James Wilson', 'james.wilson@hospital.com', '555-1001', 'Cardiology', 'LIC-2024-001', '15+ Years', '$75', 'HeartCare Medical Center', 'Expert in heart health and cardiovascular diseases.', 4.9, 120),
+('Dr. Sarah Martinez', 'sarah.martinez@hospital.com', '555-1002', 'Neurology', 'LIC-2024-002', '12+ Years', '$85', 'Brain Health Clinic', 'Specialist in neurological disorders and brain health.', 4.8, 95),
+('Dr. Michael Lee', 'michael.lee@hospital.com', '555-1003', 'Orthopedics', 'LIC-2024-003', '10+ Years', '$65', 'OrthoCare Hospital', 'Experienced in joint replacement and sports injuries.', 4.7, 150),
+('Dr. Jennifer Taylor', 'jennifer.taylor@hospital.com', '555-1004', 'Dermatology', 'LIC-2024-004', '8+ Years', '$60', 'SkinHealth Clinic', 'Board-certified dermatologist focusing on skin treatments.', 4.9, 200),
+('Dr. Christopher Anderson', 'chris.anderson@hospital.com', '555-1005', 'Pediatrics', 'LIC-2024-005', '20+ Years', '$50', 'Children''s Health Hospital', 'Compassionate pediatric care for all ages.', 5.0, 310);
 
 -- Sample Data for Appointment Table
 INSERT INTO Appointment (patient_id, doctor_id, appointment_date, appointment_time, status, reason, notes) VALUES

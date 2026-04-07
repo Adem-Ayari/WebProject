@@ -1,10 +1,12 @@
 <?php
 session_start();
 
-if (empty($_SESSION['user_id'])) {
+if (empty($_SESSION['user_id']) && empty($_SESSION['doctor_id'])) {
   header('Location: ../login_signup/login-register.php?force_login=1');
   exit;
 }
+
+$is_doctor = !empty($_SESSION['doctor_id']);
 
 if (empty($_SESSION['csrf_token'])) {
   $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -65,9 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
         <div class="nav-actions">
           <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
-            <button type="submit" name="logout_submit" class="signin">Logout</button>
+            <button type="submit" name="logout_submit" class="btn-logout">Logout</button>
           </form>
-          <a href="../dashboard_client/patient.php" class="btn">Dashboard</a>
+          <a href="<?php echo $is_doctor ? '../prescriptions_dcotor/prescriptions_doctor.php' : '../dashboard_client/patient.php'; ?>" class="btn">Dashboard</a>
           <a href="../book/book.php" class="btn">Book Appointment</a>
         </div>
       </header>

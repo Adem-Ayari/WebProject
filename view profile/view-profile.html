@@ -10,7 +10,7 @@
     <header>
       <div class="logo">Health <span>Connect</span></div>
       <nav class="navigation">
-        <a href="../homepage/index.html" class="btn-home">Home</a>
+        <a href="../homepage/index.php" class="btn-home">Home</a>
       </nav>
     </header>
 
@@ -22,7 +22,7 @@
             <span id="doctorDescription" class="description"></span>
           </div>
           <a href="../book/book.php">
-          <button class="btn-main">Book Appointment</button>
+            <button class="btn-main">Book Appointment</button>
           </a>
         </div>
         <div class="profile-right">
@@ -62,29 +62,30 @@
     </section>
 
     <script type="module">
-      import { doctors } from "./doctor-data.js";
+      import { doctors } from './doctor-data.js';
 
       const urlParams = new URLSearchParams(window.location.search);
-      const doctorId = parseInt(urlParams.get("id"));
+      const doctorId = parseInt(urlParams.get('id'));
 
       const doctor = doctors.find((d) => d.id === doctorId);
 
       if (doctor) {
-        document.getElementById("doctorImg").src = doctor.image;
-        document.getElementById("doctorImg").alt = doctor.name;
-        document.getElementById("doctorName").innerText = doctor.name;
-        document.getElementById("doctorSpecialty").innerText = doctor.specialty;
-        document.getElementById("doctorRating").innerText = `★ ${doctor.rating} (${doctor.reviews} reviews)`;
-        document.getElementById("doctorDescription").innerText = doctor.description;
-        document.getElementById("doctorExperience").innerText = doctor.experience;
-        document.getElementById("doctorFee").innerText = doctor.fee;
-        document.getElementById("doctorNext").innerText = doctor.nextAvailable;
-        document.getElementById("doctorHospital").innerText = doctor.hospital;
-        document.getElementById("doctorAbout").innerText = doctor.about;
-        document.getElementById("doctorPhone").innerText = doctor.contact.phone;
-        document.getElementById("doctorEmail").innerText = doctor.contact.email;
+        document.getElementById('doctorImg').src = doctor.image;
+        document.getElementById('doctorImg').alt = doctor.name;
+        document.getElementById('doctorName').innerText = doctor.name;
+        document.getElementById('doctorSpecialty').innerText = doctor.specialty;
+        document.getElementById('doctorRating').innerText =
+          `★ ${doctor.rating} (${doctor.reviews} reviews)`;
+        document.getElementById('doctorDescription').innerText = doctor.description;
+        document.getElementById('doctorExperience').innerText = doctor.experience;
+        document.getElementById('doctorFee').innerText = doctor.fee;
+        document.getElementById('doctorNext').innerText = doctor.nextAvailable;
+        document.getElementById('doctorHospital').innerText = doctor.hospital;
+        document.getElementById('doctorAbout').innerText = doctor.about;
+        document.getElementById('doctorPhone').innerText = doctor.contact.phone;
+        document.getElementById('doctorEmail').innerText = doctor.contact.email;
       } else {
-        document.body.innerHTML = "<h1>Doctor not found</h1>";
+        document.body.innerHTML = '<h1>Doctor not found</h1>';
       }
     </script>
   </body>

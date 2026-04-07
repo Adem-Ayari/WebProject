@@ -1,6 +1,6 @@
 @font-face {
-  font-family: "Orbitron";
-  src: url(./fonts/Orbitron-Black.ttf) format("truetype");
+  font-family: 'Orbitron';
+  src: url(./fonts/Orbitron-Black.ttf) format('truetype');
 }
 .loadingpage {
   height: 100vh;
@@ -19,7 +19,7 @@
   background-position: 100% 0%;
   color: transparent;
   font-size: 80px;
-  font-family: "Orbitron", sans-serif;
+  font-family: 'Orbitron', sans-serif;
   letter-spacing: 20px;
   animation: loadingAnimation 2s ease forwards;
   transform-style: preserve-3d;
@@ -63,7 +63,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", "Tahoma", "Geneva", Verdana, sans-serif;
+  font-family: 'Segoe UI', 'Tahoma', 'Geneva', Verdana, sans-serif;
 }
 .navbar {
   display: flex;
@@ -107,12 +107,30 @@
   text-decoration: none;
   border-radius: 6px;
   font-weight: 500;
-  margin-right:8px;
+  margin-right: 8px;
 }
 .btn:hover {
   background-color: #084fc4;
 }
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  background-color: #ff4757;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  margin-right: 8px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+}
 
+.btn-logout:hover {
+  background-color: #ff2a3f;
+}
 /*Hero Section */
 .hero {
   padding: 90px 40px;
@@ -660,7 +678,7 @@ footer {
   display: block;
   font-size: 14px;
 }
-.doctors-sidebar input[type="checkbox"] {
+.doctors-sidebar input[type='checkbox'] {
   margin-right: 8px;
   transform: scale(1.1);
 }

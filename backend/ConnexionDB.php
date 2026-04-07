@@ -1,5 +1,5 @@
 <?php
-class ConnexionBD
+class ConnexionDB
 
  {
         private static $_dbname = "dbproject";                       // Set your database name here
@@ -22,7 +22,7 @@ self::$_bdd = new PDO("mysql:host=" . self::$_host . ";dbname=" . self::$_dbname
     {
 
         if (!self::$_bdd){
-            new ConnexionBD();
+            new ConnexionDB();
             return (self::$_bdd);
         }
         return (self::$_bdd);

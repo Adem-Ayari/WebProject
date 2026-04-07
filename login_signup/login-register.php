@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 
 try {
     include '../backend/ConnexionDB.php';
-    $db = ConnexionBD::getInstance();
+    $db = ConnexionDB::getInstance();
     
     if (!$db) {
         throw new Exception("Failed to get database connection");
@@ -168,7 +168,7 @@ if (isset($_POST['show_register'])) {
             <span>Connect</span>
         </h2>
         <nav class="navigation">
-            <a href="../homepage/index.html" class="btn-home">Home</a>
+            <a href="../homepage/index.php" class="btn-home">Home</a>
         </nav>
     </header>
 

@@ -1,0 +1,25 @@
+# Ignore dependencies
+node_modules/
+vendor/
+
+# Ignore build and compiled output
+dist/
+build/
+.next/
+out/
+
+# Ignore database files
+*.sql
+*.sqlite
+MARIADB.session.sql
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore minified scripts
+*.min.js
+*.min.css
+
+# Log files
+*.log
