@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
                     $_SESSION['email'] = $email;
                     $_SESSION['role'] = 'patient';
 
-                    header("Location: ../homepage/index.php");
+                    header("Location: ../homepage/connected.php");
                     exit;
                 } else {
                     $error = "Invalid email or password";
@@ -243,6 +243,13 @@ if (isset($_POST['show_register'])) {
                     <label>Password (min. 8 characters)</label>
                     <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
                 </div>
+
+                <div class="input-box">
+                    <input type="password" name="Rpassword_confirm" required />
+                    <label>Confirm Password</label>
+                    <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
+                </div>
+
                 <div class="input-box select-box">
                     <select class="form-select" name="Rrole" required>
                         <option value="" selected disabled hidden></option>
@@ -251,12 +258,6 @@ if (isset($_POST['show_register'])) {
                     </select>
                     <label>Choose your role</label>
                     <span class="icon"><ion-icon name="chevron-down-outline"></ion-icon></span>
-                </div>
-
-                <div class="input-box">
-                    <input type="password" name="Rpassword_confirm" required />
-                    <label>Confirm Password</label>
-                    <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
                 </div>
 
                 <button type="submit" name="register_submit" class="btn-main">Register</button>
