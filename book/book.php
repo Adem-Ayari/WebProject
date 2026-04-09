@@ -1,9 +1,38 @@
 <?php
+require_once '../backend/autoloader.php';
+
 session_start();
 
 if (empty($_SESSION['user_id'])) {
   header('Location: ../login_signup/login-register.php?force_login=1');
   exit;
+}
+$repository=new Repository_database();
+$doctors = $repository->getAllDoctors();
+$selected_doctor_id = isset($_POST['doctor_id']) ? $_POST['doctor_id'] : null;
+$message="";
+$messageClass="";
+if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['book_submit'])){
+  $patient_id = $_SESSION['user_id'];
+  $doctor_id = $_POST['doctor_id'];
+  $appointment_date = $_POST['appointment_date'];
+  $appointment_time = $_POST['appointment_time'];
+  $reason = $_POST['reason'];
+  $notes = $_POST['notes'];
+  if (!empty($doctor_id) && !empty($appointment_date) && !empty($appointment_time) ) {
+    if($repository->bookAppointment($patient_id, $doctor_id, $appointment_date, $appointment_time, $reason, $notes)) {
+      $message = "Your appointment has been booked successfully!";
+      $messageClass = "alert-success";
+    } 
+    else {
+      $message = "Failed to book the appointment. Please try again.";
+      $messageClass = "alert-danger";
+    }
+    }
+    else {
+        $message = "Please fill in all required fields.";
+        $messageClass = "alert-warning";
+    }
 }
 ?>
 
@@ -28,58 +57,65 @@ if (empty($_SESSION['user_id'])) {
         <a href="../homepage/connected.php" class="btn-home">Home</a>
       </nav>
     </header>
-
     <div class="wrapper">
+      <?php if ($message): ?>
+    <div class="alert <?php echo $messageClass; ?>"><?php echo $message; ?></div>
+<?php endif; ?>
       <div class="form-box-book">
         <h2>Book Your Appointment</h2>
         <p class="subtitle">Schedule a consultation with one of our trusted doctors</p>
-        <form action="#" method="POST" class="appointment-form">
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="POST" class="appointment-form">
           <div class="form-grid">
             <div class="input-box">
-              <input type="text" required />
+              <input type="text" name="full_name" required />
               <label>Full Name</label>
               <span class="icon"><ion-icon name="person-outline"></ion-icon></span>
             </div>
 
             <div class="input-box">
-              <input type="email" required />
+              <input type="email" name="email" required />
               <label>Email Address</label>
               <span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
             </div>
 
             <div class="input-box">
-              <input type="tel" required />
-              <label>Phone Number</label>
-              <span class="icon"><ion-icon name="call-outline"></ion-icon></span>
+              <input type="text" name="reason" required />
+              <label>Reason for Visit</label>
+              <span class="icon"><ion-icon name="information-circle-outline"></ion-icon></span>
             </div>
 
             <div class="input-box">
-              <select id="doctorSelect" required>
-                <option value="" disabled selected></option>
-              </select>
+              <select name="doctor_id" id="doctorSelect" required>
+        <option value="" disabled <?php echo ($selected_doctor_id == 0) ? 'selected' : ''; ?>>Select a Doctor</option>
+        <?php foreach ($doctors as $doctor): ?>
+            <option value="<?php echo $doctor['id']; ?>" <?php echo ($selected_doctor_id == $doctor['id']) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($doctor['name'] . " (" . $doctor['specialization'] . ")"); ?>
+            </option>
+        <?php endforeach; ?>
+      </select>
               <label>Choose Doctor</label>
             </div>
 
             <div class="input-box">
-              <input type="date" required />
+              <input type="date" name="appointment_date" required />
               <label>Preferred Date</label>
               <span class="icon"><ion-icon name="calendar-outline"></ion-icon></span>
             </div>
 
             <div class="input-box">
-              <input type="time" required />
+              <input type="time" name="appointment_time" required />
               <label>Preferred Time</label>
               <span class="icon"><ion-icon name="time-outline"></ion-icon></span>
             </div>
 
             <div class="input-box full-width">
-              <textarea required></textarea>
+              <textarea name="notes" ></textarea>
               <label>Additional Notes</label>
               <span class="icon"><ion-icon name="document-text-outline"></ion-icon></span>
             </div>
           </div>
 
-          <button type="submit" class="btn-main full-width">Book Appointment</button>
+          <button type="submit" name="book_submit" class="btn-main full-width">Book Appointment</button>
           <script type="module">
             import { doctors } from "./doctor-data.js";
 

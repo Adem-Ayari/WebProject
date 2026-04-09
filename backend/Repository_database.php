@@ -53,5 +53,31 @@ class Repository_database {
             return [];
         }
     }
+    public function getAllDoctors() {
+        try {
+            $stmt = $this->db->prepare("SELECT id, name, specialization FROM Doctor order by name asc");
+            $stmt->execute();
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
+    public function bookAppointment($patientId, $doctorId, $appointmentDate, $appointmentTime, $reason, $notes) {
+        try {
+            if(strtotime($appointmentDate) < strtotime(date('Y-m-d'))) {
+                return false; // Cannot book an appointment in the past
+            }
+            else if(strtotime($appointmentDate) == strtotime(date('Y-m-d')) && strtotime($appointmentTime) < strtotime(date('H:i'))) {
+                return false; // Cannot book an appointment for earlier today
+            }
+            else {
+            $stmt = $this->db->prepare("INSERT INTO Appointment (patient_id, doctor_id, appointment_date,appointment_time,status, reason, notes) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$patientId, $doctorId, $appointmentDate, $appointmentTime, 'pending', $reason, $notes]);
+            return true;}
+        } catch (Exception $e) {
+            return false;
+        }
+    }
 
 }
