@@ -16,7 +16,8 @@ class Repository_database {
                     A.appointment_date AS date_cons, 
                     D.specialization AS type_cons, 
                     D.name AS doctor_name, 
-                    A.status AS status_cons 
+                    A.status AS status_cons,
+                    A.prescription_path AS prescription_path
                 FROM Appointment A
                 INNER JOIN Doctor D ON A.doctor_id = D.id
                 WHERE A.patient_id = ? 
@@ -34,10 +35,12 @@ class Repository_database {
         try {
             $stmt = $this->db->prepare(" 
                 SELECT 
+                    A.appointment_id AS appointment_id,
                     A.appointment_date AS date_cons,
                     P.name AS patient_name,
                     A.reason AS medical_resume,
-                    A.status AS status_cons
+                    A.status AS status_cons,
+                    A.prescription_path AS prescription_path
                 FROM Appointment A
                 INNER JOIN Patient P ON A.patient_id = P.id
                 WHERE A.doctor_id = ?

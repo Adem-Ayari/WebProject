@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
             <button type="submit" name="logout_submit" class="btn-logout">Logout</button>
           </form>
-          <a href="<?php echo $is_doctor ? '../prescriptions_dcotor/prescriptions_doctor.php' : '../dashboard_client/patient.php'; ?>" class="btn">Dashboard</a>
+          <a href="<?php echo $is_doctor ? '../acceptAppointment/index.php' : '../dashboard_client/patient.php'; ?>" class="btn">Dashboard</a>
           <a href="../book/book.php" class="btn">Book Appointment</a>
         </div>
       </header>

@@ -123,8 +123,6 @@ try {
             </span>
         </td>
         <td class="text-end">
-    <button class="btn btn-sm btn-outline-primary">View</button>
-    
     <?php if (!empty($consultation['prescription_path'])): ?>
         <a href="../uploads/prescriptions/<?= $consultation['prescription_path'] ?>" 
            class="btn btn-sm btn-outline-danger" 

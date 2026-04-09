@@ -1,3 +1,31 @@
+<?php
+session_start();
+
+if (empty($_SESSION['doctor_id']) && empty($_SESSION['user_id'])) {
+    header('Location: ../login_signup/login-register.php?force_login=1');
+    exit;
+}
+
+try {
+    require_once '../backend/autoloader.php';
+    $repo = new Repository_database();
+
+    $doctorId = !empty($_SESSION['doctor_id']) ? (int) $_SESSION['doctor_id'] : (int) $_SESSION['user_id'];
+    $result = $repo->getAllPrescriptionsForDoctor($doctorId);
+    $prescriptions = is_array($result) ? $result : [];
+
+    $db = ConnexionDB::getInstance();
+    $stmt = $db->prepare("SELECT name FROM Doctor WHERE id = ?");
+    $stmt->execute([$doctorId]);
+    $doctorData = $stmt->fetch(PDO::FETCH_ASSOC);
+    $doctorName = $doctorData ? $doctorData['name'] : 'Doctor';
+} catch (Exception $e) {
+    $prescriptions = [];
+    $error_db = $e->getMessage();
+}
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,24 +33,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Appointment Requests</title>
   <link rel="stylesheet" href="appointments.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 </head>
 <body>
 
 <!-- ─── TOP NAV ──────────────────────────────── -->
-<nav class="topnav">
-  <div class="nav-brand">
-    <div class="nav-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M22 16.92V19a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3 5.18 2 2 0 0 1 5 3h2.09a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 10.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 17.92z"/>
-      </svg>
-    </div>
-    <span class="nav-name">TeleMed | Online Healthcare</span>
-  </div>
-  <div class="nav-right">
-    <span class="nav-doc-name">Dr. Karim Ayari</span>
-    <div class="nav-avatar">KA</div>
-  </div>
-</nav>
+<header class="navbar">
+        <div class="logo">
+          Health
+          <span>Connect</span>
+        </div>
+        <nav class="nav-links">
+          <a href="../homepage/connected.php">Home</a>
+        </nav>
+
+        <div class="nav-actions">
+          <a href="../view profile/doctor-profile.php" class="profile-account me-3">
+            <img src="https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827774.jpg" alt="Profile" class="profile-avatar">
+            <span class="profile-name"><?= htmlspecialchars($doctorName) ?></span>
+          </a>
+          <a href="../login_signup/logout.php" class="btn-logout">Logout</a>
+          <a href="../doctor_calendar/doctor_calendar.php" class="btn nav-shortcut">Calendar</a>
+          <a href="../prescriptions_dcotor/prescriptions_doctor.php" class="btn nav-shortcut">Prescriptions</a>
+        </div>
+      </header>
+
 
 <!-- ════════════════════════════════════════════
      PAGE 1 — APPOINTMENT LIST

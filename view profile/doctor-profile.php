@@ -8,7 +8,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'doctor' || !isset($_SESS
 }
 
 $db = ConnexionDB::getInstance();
-$doctor_id = $_SESSION['doctor_id'];
+$doctor_id = (int) $_SESSION['doctor_id'];
 $success_msg = "";
 $error_msg = "";
 
@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
     }
 }
 
-$stmt = $db->prepare("SELECT * FROM Doctor WHERE id = ?");
+  $stmt = $db->prepare("SELECT id, name, email, phone, specialization, license_number, experience, consultation_fee, hospital, about, rating, reviews FROM Doctor WHERE id = ? LIMIT 1");
 $stmt->execute([$doctor_id]);
 $doctor = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -51,7 +51,7 @@ $placeholderImage = "https://img.freepik.com/free-photo/female-doctor-hospital-w
       <div class="logo">Health <span>Connect</span></div>
       <nav class="navigation navbar-flex">
         <a href="../homepage/connected.php" class="btn-home">Home</a>
-        <a href="../prescriptions_dcotor/prescriptions_doctor.php" class="btn-home btn-dashboard">Dashboard</a>
+        <a href="../acceptAppointment/index.php" class="btn-home btn-dashboard">Dashboard</a>
         <a href="../login_signup/logout.php" class="btn-logout">Logout</a>
       </nav>
     </header>

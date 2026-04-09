@@ -60,9 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
                     $_SESSION['email'] = $email;
                     $_SESSION['role'] = 'doctor';
 
-                    header("Location: ../prescriptions_dcotor/prescriptions_doctor.php");
+                    header("Location: ../acceptAppointment/index.php");
                     exit;
                 }
+        
 
                 // 2) Sinon on teste le patient
                 $query = $db->prepare("SELECT id, password FROM Patient WHERE email = ?");

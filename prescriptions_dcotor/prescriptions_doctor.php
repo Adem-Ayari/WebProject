@@ -6,6 +6,9 @@ if (empty($_SESSION['doctor_id']) && empty($_SESSION['user_id'])) {
     exit;
 }
 
+$uploadSuccess = '';
+$uploadError = '';
+
 try {
     require_once '../backend/autoloader.php';
     $repo = new Repository_database();
@@ -15,10 +18,62 @@ try {
     $prescriptions = is_array($result) ? $result : [];
 
     $db = ConnexionDB::getInstance();
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_pdf'])) {
+      $appointmentId = isset($_POST['appointment_id']) ? (int) $_POST['appointment_id'] : 0;
+
+      if ($appointmentId <= 0) {
+        $uploadError = 'Invalid appointment.';
+      } elseif (!isset($_FILES['prescription_pdf']) || $_FILES['prescription_pdf']['error'] !== UPLOAD_ERR_OK) {
+        $uploadError = 'Please select a valid PDF file.';
+      } else {
+        $file = $_FILES['prescription_pdf'];
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $mimeType = mime_content_type($file['tmp_name']);
+        $allowedMime = ['application/pdf', 'application/x-pdf'];
+
+        if ($extension !== 'pdf' || !in_array($mimeType, $allowedMime, true)) {
+          $uploadError = 'Only PDF files are allowed.';
+        } elseif ($file['size'] > 5 * 1024 * 1024) {
+          $uploadError = 'PDF size must be less than 5MB.';
+        } else {
+          $ownershipStmt = $db->prepare('SELECT appointment_id FROM Appointment WHERE appointment_id = ? AND doctor_id = ?');
+          $ownershipStmt->execute([$appointmentId, $doctorId]);
+          $ownedAppointment = $ownershipStmt->fetch(PDO::FETCH_ASSOC);
+
+          if (!$ownedAppointment) {
+            $uploadError = 'You can only upload for your own appointments.';
+          } else {
+            $uploadDir = __DIR__ . '/../uploads/prescriptions';
+            if (!is_dir($uploadDir)) {
+              mkdir($uploadDir, 0755, true);
+            }
+
+            $newFileName = 'prescription_' . $appointmentId . '_' . time() . '.pdf';
+            $targetPath = $uploadDir . '/' . $newFileName;
+
+            if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+              $updateStmt = $db->prepare('UPDATE Appointment SET prescription_path = ? WHERE appointment_id = ? AND doctor_id = ?');
+              if ($updateStmt->execute([$newFileName, $appointmentId, $doctorId])) {
+                $uploadSuccess = 'PDF uploaded successfully.';
+              } else {
+                $uploadError = 'Upload succeeded but database update failed.';
+              }
+            } else {
+              $uploadError = 'Failed to save uploaded PDF.';
+            }
+          }
+        }
+      }
+    }
+
     $stmt = $db->prepare("SELECT name FROM Doctor WHERE id = ?");
     $stmt->execute([$doctorId]);
     $doctorData = $stmt->fetch(PDO::FETCH_ASSOC);
     $doctorName = $doctorData ? $doctorData['name'] : 'Doctor';
+
+    $result = $repo->getAllPrescriptionsForDoctor($doctorId);
+    $prescriptions = is_array($result) ? $result : [];
 } catch (Exception $e) {
     $prescriptions = [];
     $error_db = $e->getMessage();
@@ -57,7 +112,7 @@ try {
             <span class="profile-name"><?= htmlspecialchars($doctorName) ?></span>
           </a>
           <a href="../login_signup/logout.php" class="btn-logout">Logout</a>
-          <a href="../book/book.php" class="btn">Calendar</a>
+          <a href="../doctor_calendar/doctor_calendar.php" class="btn">Calendar</a>
         </div>
       </header>
 
@@ -67,6 +122,13 @@ try {
             <h3>Medical prescriptions</h3>
           </div>
           <div class="card-body">
+            <?php if (!empty($uploadSuccess)): ?>
+              <div class="alert alert-success" role="alert"><?= htmlspecialchars($uploadSuccess) ?></div>
+            <?php endif; ?>
+            <?php if (!empty($uploadError)): ?>
+              <div class="alert alert-danger" role="alert"><?= htmlspecialchars($uploadError) ?></div>
+            <?php endif; ?>
+
             <div class="row g-3 mb-4 align-items-end">
               <div class="col-md-4">
                 <label class="form-label small text-muted">Rechercher par nom du patient :</label>
@@ -126,8 +188,15 @@ try {
                         <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($status) ?></span>
                       </td>
                       <td class="text-end">
-                        <button class="btn btn-sm btn-outline-primary">View</button>
-                        <button class="btn btn-sm btn-outline-secondary">PDF</button>
+                        <?php if (!empty($prescription['prescription_path'])): ?>
+                          <a href="../uploads/prescriptions/<?= htmlspecialchars($prescription['prescription_path']) ?>" class="btn btn-sm btn-outline-success" target="_blank" rel="noopener noreferrer">PDF</a>
+                        <?php else: ?>
+                          <form method="POST" enctype="multipart/form-data" class="pdf-upload-form d-inline-flex align-items-center gap-2">
+                            <input type="hidden" name="appointment_id" value="<?= (int) $prescription['appointment_id'] ?>">
+                            <input type="file" name="prescription_pdf" accept="application/pdf" class="form-control form-control-sm -input" required>
+                            <button type="submit" name="upload_pdf" class="btn btn-sm btn-outline-secondary">Send PDF</button>
+                          </form>
+                        <?php endif; ?>
                       </td>
                     </tr>
                   <?php endforeach; ?>

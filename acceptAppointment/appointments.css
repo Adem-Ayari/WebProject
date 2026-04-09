@@ -36,48 +36,114 @@ body {
 .page.active { display: block; }
 
 /* ─── TOPNAV ─────────────────────────────── */
-.topnav {
-  background: #fff;
-  border-bottom: 1px solid var(--gray-100);
-  padding: 0 2rem;
-  height: 58px;
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+}
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #0a6cff;
+}
+.logo span {
+  color: #1a1a1a;
+}
+.nav-links a {
+  margin: 0 15px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+.nav-links a:hover {
+  color: #0a6cff;
+}
+.nav-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
-.nav-brand {
-  display: flex;
+.signin {
+  margin-right: 20px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+.btn {
+  padding: 10px 18px;
+  background-color: #0a6cff;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.btn:hover {
+  background-color: #084fc4;
+}
+
+.nav-shortcut {
+  background-color: transparent;
+  color: #333;
+  padding: 0;
+  margin-left: 14px;
+  border-radius: 0;
+  font-weight: 500;
+}
+
+.nav-shortcut:hover {
+  background-color: transparent;
+  color: #0a6cff;
+}
+
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  background-color: #ff4757;
+  color: white !important;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: 500;
+  margin-right: 8px;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-logout:hover {
+  background-color: #ff2a3f;
+}
+
+.profile-account {
+  display: inline-flex;
   align-items: center;
   gap: 10px;
-}
-.nav-logo {
-  width: 32px;
-  height: 32px;
-  background: var(--blue-brand-600);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.nav-logo svg { width: 17px; height: 17px; color: #fff; }
-.nav-name { font-size: 15px; font-weight: 600; color: var(--gray-900); }
-.nav-right { display: flex; align-items: center; gap: 12px; }
-.nav-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--blue-brand-50);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
+  text-decoration: none;
+  color: #333;
   font-weight: 600;
-  color: var(--blue-brand-600);
+  padding: 5px 12px;
+  border-radius: 20px;
+  transition: all 0.3s;
 }
-.nav-doc-name { font-size: 13px; font-weight: 500; color: var(--gray-600); }
+
+.profile-account:hover {
+  background-color: #f1f5f9;
+  color: #0a6cff;
+}
+
+.profile-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #0a6cff;
+}
+
+.profile-name {
+  font-size: 0.95rem;
+}
 
 /* ─── LIST PAGE ─────────────────────────── */
 .list-wrap { max-width: 860px; margin: 0 auto; padding: 2rem 1rem; }
