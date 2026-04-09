@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Calendar</title>
+  <link rel="stylesheet" href="doctor-calendar.css" />
+</head>
+<body>
+  <div class="calendar-page">
+    <header class="calendar-header">
+      <div>
+        <h1>Doctor Calendar</h1>
+        <p>Manage tasks and consultations efficiently</p>
+      </div>
+
+      <div class="view-switcher">
+        <button class="view-btn active" data-view="month">Month</button>
+        <button class="view-btn" data-view="week">Week</button>
+        <button class="view-btn" data-view="day">Day</button>
+      </div>
+    </header>
+
+    <section class="calendar-toolbar card">
+      <div class="nav-group">
+        <button id="prevBtn" class="btn btn-light">◀ Prev</button>
+        <button id="todayBtn" class="btn btn-primary">Today</button>
+        <button id="nextBtn" class="btn btn-light">Next ▶</button>
+      </div>
+
+      <h2 id="calendarTitle"></h2>
+
+      <button id="openModalBtn" class="btn btn-success">+ Add Event</button>
+    </section>
+
+    <section class="legend card">
+      <span><i class="dot consultation"></i> Consultation</span>
+      <span><i class="dot task"></i> Task</span>
+      <span><i class="dot completed"></i> Completed</span>
+    </section>
+
+    <section class="calendar-container card">
+      <div id="calendarGrid"></div>
+    </section>
+  </div>
+
+  <!-- Modal -->
+  <div id="eventModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add Event</h3>
+        <button id="closeModalBtn" class="icon-btn" type="button">✕</button>
+      </div>
+
+      <form id="eventForm">
+        <input type="hidden" id="eventId" />
+
+        <div class="form-row">
+          <label for="eventTitle">Title</label>
+          <input id="eventTitle" type="text" required />
+        </div>
+
+        <div class="form-row two-cols">
+          <div>
+            <label for="eventType">Type</label>
+            <select id="eventType" required>
+              <option value="consultation">Consultation</option>
+              <option value="task">Task</option>
+            </select>
+          </div>
+          <div>
+            <label for="eventStatus">Status</label>
+            <select id="eventStatus" required>
+              <option value="planned">Planned</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="eventDate">Date</label>
+          <input id="eventDate" type="date" required />
+        </div>
+
+        <div class="form-row two-cols">
+          <div>
+            <label for="eventStart">Start Time</label>
+            <input id="eventStart" type="time" required />
+          </div>
+          <div>
+            <label for="eventEnd">End Time</label>
+            <input id="eventEnd" type="time" required />
+          </div>
+        </div>
+
+        <!-- Show only when type = consultation -->
+        <div class="form-row" id="patientRow">
+          <label for="eventPatient">Patient Name</label>
+          <input id="eventPatient" type="text" placeholder="Required for consultations" />
+        </div>
+
+        <div class="form-row">
+          <label for="eventNotes">Notes</label>
+          <textarea id="eventNotes" rows="3" placeholder="Extra details..."></textarea>
+        </div>
+
+        <p id="formError" class="form-error"></p>
+
+        <div class="modal-actions">
+          <button type="button" id="deleteEventBtn" class="btn btn-danger hidden">Delete</button>
+          <button type="submit" class="btn btn-success">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="doctor-calendar.js"></script>
+</body>
+</html>
