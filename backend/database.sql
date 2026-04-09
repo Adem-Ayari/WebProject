@@ -27,7 +27,8 @@ CREATE TABLE Doctor (
     about           TEXT,
     rating          DECIMAL(2,1) DEFAULT 0.0,
     reviews         INT DEFAULT 0,
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    image_path       VARCHAR(255) DEFAULT NULL
 );
 
 -- Appointment Table
