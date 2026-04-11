@@ -735,7 +735,7 @@ session_start();
           </p>
           <div class="cta-actions">
             <a href="../book/book.php" class="btn book-btn">Book Your Appointment</a>
-            <input class="cta-input" placeholder="Search services or doctors" />
+            <a href="../rechercher_docteurs/rechercher_docteurs.php" class="btn doctors-btn">Find a Doctor</a>
           </div>
 
           <hr class="cta-divider" />
