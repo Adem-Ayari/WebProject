@@ -222,6 +222,13 @@ body {
   background-color: #084fc4;
 }
 
+footer {
+  text-align: center;
+  padding: 15px;
+  background: #0a6cff;
+  color: #fff;
+}
+
 /* Doctor Cards Grid */
 .doctors-grid {
   display: grid;

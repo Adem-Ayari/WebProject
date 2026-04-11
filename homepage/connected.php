@@ -767,7 +767,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
           </p>
           <div class="cta-actions">
             <a href="../book/book.php" class="btn book-btn">Book Your Appointment</a>
-            <input class="cta-input" placeholder="Search services or doctors" />
+            <a href="../rechercher_docteurs/rechercher_docteurs.php" class="btn explore-btn">Explore Doctors</a>
           </div>
 
           <hr class="cta-divider" />

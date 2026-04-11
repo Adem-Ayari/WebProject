@@ -64,7 +64,7 @@ try{
         <header class="navbar">
             <div class="logo">Health <span>Connect</span></div>
             <nav class="nav-links">
-                <a href="../homepage/index.php">Home</a>
+                <a href="../homepage/connected.php">Home</a>
             </nav>
             <div class="nav-actions">
                 <a href="../login_signup/logout.php" class="signin text-danger fw-bold">Logout</a>
@@ -151,6 +151,10 @@ try{
           </div>
         </div>
     </section>
+
+    <footer>
+      <p>&copy; 2026 HealthConnect. All rights reserved.</p>
+    </footer>
     </div>
 
     <script>

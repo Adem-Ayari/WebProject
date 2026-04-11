@@ -120,5 +120,9 @@ $doctor['office_place'] = $doctor['office_place'] ?: 'Not specified';
         </div>
       </div>
     </section>
+
+    <footer>
+      <p>&copy; 2026 HealthConnect. All rights reserved.</p>
+    </footer>
   </body>
 </html>

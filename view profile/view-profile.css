@@ -207,6 +207,13 @@ header {
   line-height: 1.6;
 }
 
+footer {
+  text-align: center;
+  padding: 15px;
+  background: #0a6cff;
+  color: #fff;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .profile-container {
