@@ -65,12 +65,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
         </nav>
 
         <div class="nav-actions">
+          <a href="<?php echo !($is_doctor) ? '../rechercher_docteurs/rechercher_docteurs.php' : '#'?>" class="btn">Find Doctors</a>
+          <a href="<?php echo $is_doctor ? '../acceptAppointment/index.php' : '../dashboard_client/patient.php'; ?>" class="btn">Dashboard</a>
+          <a href="../book/book.php" class="btn">Book Appointment</a>
           <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
             <button type="submit" name="logout_submit" class="btn-logout">Logout</button>
           </form>
-          <a href="<?php echo $is_doctor ? '../acceptAppointment/index.php' : '../dashboard_client/patient.php'; ?>" class="btn">Dashboard</a>
-          <a href="../book/book.php" class="btn">Book Appointment</a>
         </div>
       </header>
 
@@ -608,7 +609,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
                 >
                   Book Now
                 </a>
-                <a href="../view profile/view-profile.html?id=1" class="doctors-btn doctors-btn-outline"
+                <a href="../view profile/view-profile.php?id=1" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>
@@ -677,7 +678,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
                 >
                   Book Now
                 </a>
-                <a href="../view profile/view-profile.html?id=2" class="doctors-btn doctors-btn-outline"
+                <a href="../view profile/view-profile.php?id=2" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>
@@ -746,7 +747,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
                 >
                   Book Now
                 </a>
-                <a href="../view profile/view-profile.html?id=3" class="doctors-btn doctors-btn-outline"
+                <a href="../view profile/view-profile.php?id=3" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>

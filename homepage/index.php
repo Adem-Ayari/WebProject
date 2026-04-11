@@ -577,7 +577,7 @@ session_start();
                 >
                   Book Now
                 </a>
-                <a href="../view profile/view-profile.html?id=1" class="doctors-btn doctors-btn-outline"
+                <a href="../view profile/view-profile.php?id=1" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>
@@ -646,7 +646,7 @@ session_start();
                 >
                   Book Now
                 </a>
-                <a href="../view profile/view-profile.html?id=2" class="doctors-btn doctors-btn-outline"
+                <a href="../view profile/view-profile.php?id=2" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>
@@ -715,7 +715,7 @@ session_start();
                 >
                   Book Now
                 </a>
-                <a href="../view profile/view-profile.html?id=3" class="doctors-btn doctors-btn-outline"
+                <a href="../view profile/view-profile.php?id=3" class="doctors-btn doctors-btn-outline"
                   >View Profile</a
                 >
               </div>

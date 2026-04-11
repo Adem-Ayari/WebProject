@@ -55,7 +55,7 @@ class Repository_database {
     }
     public function getAllDoctors() {
         try {
-            $stmt = $this->db->prepare("SELECT id, name, specialization FROM Doctor order by name asc");
+            $stmt = $this->db->prepare("SELECT id, name, specialization, office_place FROM Doctor order by name asc");
             $stmt->execute();
 
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -79,5 +79,36 @@ class Repository_database {
             return false;
         }
     }
+    public function FilterDoctorsByname_location_specialization($name, $location, $specialization) {
+    try {
+        // On récupère toutes les colonnes nécessaires pour la carte
+        $query = "SELECT id, name, specialization, office_place, image_path AS photo, rating, reviews AS review_count, consultation_fee AS fee, about AS bio, experience
+            FROM Doctor 
+            WHERE 1=1";
+        $params = [];
+
+        if (!empty($name)) {
+            $query .= " AND name LIKE ?";
+            $params[] = '%' . $name . '%';
+        }
+        if (!empty($location)) {
+            $query .= " AND office_place LIKE ?";
+            $params[] = '%' . $location . '%';
+        }
+        if (!empty($specialization)) {
+            $query .= " AND specialization LIKE ?";
+            $params[] = '%' . $specialization . '%';
+        }
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        // Il est préférable de logger l'erreur pour le debug
+        error_log($e->getMessage());
+        return [];
+    }
+}
 
 }
