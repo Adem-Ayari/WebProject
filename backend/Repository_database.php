@@ -6,6 +6,23 @@ class Repository_database {
     public function __construct() {
         $this->db = ConnexionDB::getInstance();
     }
+
+    public function markPastScheduledAppointmentsAsCompleted() {
+        try {
+            $stmt = $this->db->prepare(" 
+                UPDATE Appointment
+                SET status = 'Completed'
+                WHERE status = 'Scheduled'
+                AND TIMESTAMP(appointment_date, appointment_time) < DATE_ADD(NOW(), INTERVAL 30 MINUTE)
+            ");
+            $stmt->execute();
+
+            return $stmt->rowCount();
+        } catch (Exception $e) {
+            return 0;
+        }
+}
+
     // creer le repository pour la base de donnees (une classe qui va faire toutes les requetes a la base de donnees)
     // Example method to get all appointments for a specific patient
     public function getAllAppointmentsForPatient($patientId) {

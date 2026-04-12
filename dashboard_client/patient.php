@@ -9,6 +9,8 @@ if (empty($_SESSION['user_id'])) {
 try {
     require_once '../backend/autoloader.php';
     $repo = new Repository_database();
+
+    $repo->markPastScheduledAppointmentsAsCompleted();
     
     // On récupère les données
     $result = $repo->getAllAppointmentsForPatient($_SESSION['user_id']);

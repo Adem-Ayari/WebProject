@@ -13,6 +13,8 @@ try {
     require_once '../backend/autoloader.php';
     $repo = new Repository_database();
 
+  $repo->markPastScheduledAppointmentsAsCompleted();
+
     $doctorId = !empty($_SESSION['doctor_id']) ? (int) $_SESSION['doctor_id'] : (int) $_SESSION['user_id'];
     $result = $repo->getAllPrescriptionsForDoctor($doctorId);
     $prescriptions = is_array($result) ? $result : [];
@@ -193,8 +195,17 @@ try {
                         <?php else: ?>
                           <form method="POST" enctype="multipart/form-data" class="pdf-upload-form d-inline-flex align-items-center gap-2">
                             <input type="hidden" name="appointment_id" value="<?= (int) $prescription['appointment_id'] ?>">
-                            <input type="file" name="prescription_pdf" accept="application/pdf" class="form-control form-control-sm -input" required>
-                            <button type="submit" name="upload_pdf" class="btn btn-sm btn-outline-secondary">Send PDF</button>
+            
+            <input type="file" name="prescription_pdf" id="file-<?= $prescription['appointment_id'] ?>" 
+                   accept="application/pdf" class="custom-file-input" required>
+            
+            <label for="file-<?= $prescription['appointment_id'] ?>" class="btn btn-sm btn-outline-primary mb-0">
+                Choisir...
+            </label>
+
+            <button type="submit" name="upload_pdf" class="btn btn-sm btn-primary">
+                Send PDF
+            </button>
                           </form>
                         <?php endif; ?>
                       </td>

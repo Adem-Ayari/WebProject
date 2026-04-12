@@ -80,7 +80,7 @@
   box-shadow: 2px 8px #0a6cff;
 }
 .card-header h3 {
-  font: size 1.25em;
+  font-size: 1.25em; /* Corrigé : était 'font: size' */
   font-weight: 700;
   color: #0a6cff;
   margin: 10px 0;
@@ -158,26 +158,33 @@
   justify-content: flex-end;
 }
 
-.pdf-input {
-  max-width: 210px;
+/* --- AJOUT CORRECTION DESIGN UPLOAD --- */
+
+.custom-file-input {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
 }
 
-.pdf-input::file-selector-button,
-.pdf-input::-webkit-file-upload-button {
-  background-color: #0a6cff;
-  border: none;
-  color: #fff;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-weight: 500;
+.btn-outline-primary {
+  border: 1px dashed #0a6cff;
+  color: #0a6cff;
+  background-color: transparent;
   cursor: pointer;
-  margin-right: 10px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.3s;
 }
 
-.pdf-input:hover::file-selector-button,
-.pdf-input:hover::-webkit-file-upload-button {
-  background-color: #084fc4;
+.btn-outline-primary:hover {
+  background-color: #f0f7ff;
+  border-style: solid;
 }
+/* --- FIN AJOUT --- */
 
 .pdf-upload-form .btn-outline-secondary {
   background-color: #0a6cff;

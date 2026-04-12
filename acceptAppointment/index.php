@@ -52,9 +52,13 @@ try {
     <div class="nav-links">
       <a href="../doctor_calendar/doctor_calendar.php">Calendar</a>
       <a href="#">Appointments</a>
-      <a href="../prescriptions_doctor/prescriptions_doctor.php">Prescriptions</a>
+      <a href="../prescriptions_dcotor/prescriptions_doctor.php">Prescriptions</a>
     </div>
     <div class="nav-actions">
+      <a href="../view profile/doctor-profile.php" class="profile-account me-3">
+            <img src="uploads/doctor.jpg" alt="Profile" class="profile-avatar">
+            <span class="profile-name"><?= htmlspecialchars($doctorName) ?></span>
+        </a>
       <a href="../login_signup/logout.php" class="btn-logout">Logout</a>
     </div>
   </nav>

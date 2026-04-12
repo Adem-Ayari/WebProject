@@ -27,7 +27,7 @@ CREATE TABLE Doctor (
     about           TEXT,
     rating          DECIMAL(2,1) DEFAULT 0.0,
     reviews         INT DEFAULT 0,
-    image_path       VARCHAR(255) DEFAULT NULL,
+    image_path      VARCHAR(255) DEFAULT NULL,
     created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
