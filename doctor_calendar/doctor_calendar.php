@@ -1,20 +1,71 @@
 <?php
 require_once '../backend/autoloader.php';
 session_start();
+
+// Development fallback (remove when login is fully integrated)
+if (empty($_SESSION['doctor_id'])) {
+  $_SESSION['doctor_id'] = 1;
+  $_SESSION['role'] = 'doctor';
+}
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'doctor' || !isset($_SESSION['doctor_id'])) {
-    header("Location: ../login_signup/login-register.php");
-    exit;
+  header("Location: ../login_signup/login-register.php");
+  exit;
+}
+
+try {
+  $db = ConnexionDB::getInstance();
+  $doctorId = $_SESSION['doctor_id'];
+
+  // Fetch appointments joined with patient data
+  $stmt = $db->prepare("
+        SELECT A.appointment_id, A.appointment_date, A.appointment_time, A.status, A.reason, A.notes, P.name as patient_name
+        FROM Appointment A
+        INNER JOIN Patient P ON A.patient_id = P.id
+        WHERE A.doctor_id = ? AND A.status != 'Cancelled'
+    ");
+  $stmt->execute([$doctorId]);
+  $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+  // Format for JS calendar
+  $dbEvents = [];
+  foreach ($appointments as $appt) {
+    $startTime = substr($appt['appointment_time'], 0, 5); // Format to HH:MM
+
+    // Calculate an end time (defaulting to 1 hour after start time)
+    $endObj = new DateTime($appt['appointment_date'] . ' ' . $startTime);
+    $endObj->modify('+1 hour');
+    $endTime = $endObj->format('H:i');
+
+    // Map database status to JS calendar status ('planned', 'completed')
+    $jsStatus = ($appt['status'] === 'Completed') ? 'completed' : 'planned';
+
+    $dbEvents[] = [
+      'id' => 'db_' . $appt['appointment_id'], // Prefix to identify it as a DB record
+      'title' => !empty($appt['reason']) ? $appt['reason'] : 'Consultation',
+      'type' => 'consultation',
+      'status' => $jsStatus,
+      'date' => $appt['appointment_date'],
+      'start' => $startTime,
+      'end' => $endTime,
+      'patient' => $appt['patient_name'],
+      'notes' => $appt['notes'] ?? ''
+    ];
+  }
+} catch (Exception $e) {
+  $dbEvents = []; // Fallback to empty if DB fails
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Doctor Calendar</title>
   <link rel="stylesheet" href="doctor_calendar.css" />
 </head>
+
 <body>
   <div class="calendar-page">
     <header class="calendar-header">
@@ -123,7 +174,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'doctor' || !isset($_SESS
       </form>
     </div>
   </div>
-
+  <script>
+    window.DB_EVENTS = <?= json_encode($dbEvents) ?>;
+  </script>
   <script src="doctor_calendar.js"></script>
 </body>
+
 </html>

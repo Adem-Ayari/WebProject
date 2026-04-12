@@ -1,463 +1,323 @@
 <?php
 session_start();
 
-if (empty($_SESSION['doctor_id']) && empty($_SESSION['user_id'])) {
-    header('Location: ../login_signup/login-register.php?force_login=1');
-    exit;
+// Fallback for development if no session is set (e.g., Doctor 1: Dr. James Wilson)
+if (empty($_SESSION['doctor_id'])) {
+  $_SESSION['doctor_id'] = 1;
 }
+
+require_once '../backend/autoloader.php';
 
 try {
-    require_once '../backend/autoloader.php';
-    $repo = new Repository_database();
+  $db = ConnexionDB::getInstance();
+  $doctorId = $_SESSION['doctor_id'];
 
-    $doctorId = !empty($_SESSION['doctor_id']) ? (int) $_SESSION['doctor_id'] : (int) $_SESSION['user_id'];
-    $result = $repo->getAllPrescriptionsForDoctor($doctorId);
-    $prescriptions = is_array($result) ? $result : [];
+  // Fetch all appointments for the logged-in doctor, including patient details
+  $stmt = $db->prepare("
+        SELECT A.*, P.name AS patient_name, P.email AS patient_email
+        FROM Appointment A
+        INNER JOIN Patient P ON A.patient_id = P.id
+        WHERE A.doctor_id = ?
+        ORDER BY A.appointment_date DESC, A.appointment_time DESC
+    ");
+  $stmt->execute([$doctorId]);
+  $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $db = ConnexionDB::getInstance();
-    $stmt = $db->prepare("SELECT name FROM Doctor WHERE id = ?");
-    $stmt->execute([$doctorId]);
-    $doctorData = $stmt->fetch(PDO::FETCH_ASSOC);
-    $doctorName = $doctorData ? $doctorData['name'] : 'Doctor';
+  // Calculate quick stats
+  $stats = ['total' => count($appointments), 'pending' => 0, 'scheduled' => 0, 'completed' => 0];
+  foreach ($appointments as $appt) {
+    $status = strtolower($appt['status']);
+    if (isset($stats[$status])) {
+      $stats[$status]++;
+    }
+  }
 } catch (Exception $e) {
-    $prescriptions = [];
-    $error_db = $e->getMessage();
+  die("Database Error: " . $e->getMessage());
 }
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Appointment Requests</title>
-  <link rel="stylesheet" href="appointments.css" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Appointments</title>
+  <link rel="stylesheet" href="appointments.css">
 </head>
+
 <body>
 
-<!-- ─── TOP NAV ──────────────────────────────── -->
-<header class="navbar">
-        <div class="logo">
-          Health
-          <span>Connect</span>
-        </div>
-        <nav class="nav-links">
-          <a href="../homepage/connected.php">Home</a>
-        </nav>
-
-        <div class="nav-actions">
-          <a href="../view profile/doctor-profile.php" class="profile-account me-3">
-            <img src="https://img.freepik.com/free-photo/female-doctor-hospital-with-stethoscope_23-2148827774.jpg" alt="Profile" class="profile-avatar">
-            <span class="profile-name"><?= htmlspecialchars($doctorName) ?></span>
-          </a>
-          <a href="../login_signup/logout.php" class="btn-logout">Logout</a>
-          <a href="../doctor_calendar/doctor_calendar.php" class="btn nav-shortcut">Calendar</a>
-          <a href="../prescriptions_dcotor/prescriptions_doctor.php" class="btn nav-shortcut">Prescriptions</a>
-        </div>
-      </header>
-
-
-<!-- ════════════════════════════════════════════
-     PAGE 1 — APPOINTMENT LIST
-════════════════════════════════════════════ -->
-<div class="page active" id="page-list">
-  <div class="list-wrap">
-
-    <div class="list-header">
-      <h1>Appointment requests</h1>
-      <p>Review and confirm pending patient appointments</p>
+  <nav class="navbar">
+    <div class="logo">Health<span>Care</span></div>
+    <div class="nav-links">
+      <a href="../doctor_calendar/doctor_calendar.php">Calendar</a>
+      <a href="#">Appointments</a>
+      <a href="../prescriptions_doctor/prescriptions_doctor.php">Prescriptions</a>
     </div>
-
-    <!-- Stats -->
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-label">Total today</div>
-        <div class="stat-value">8</div>
-        <div class="stat-sub">Apr 17, 2026</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Pending</div>
-        <div class="stat-value" style="color:#b07d1a">5</div>
-        <div class="stat-sub">Awaiting review</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Confirmed</div>
-        <div class="stat-value" style="color:#0f6e56">2</div>
-        <div class="stat-sub">This week</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Urgent</div>
-        <div class="stat-value" style="color:#c0392b">1</div>
-        <div class="stat-sub">Needs attention</div>
-      </div>
+    <div class="nav-actions">
+      <a href="../login_signup/logout.php" class="btn-logout">Logout</a>
     </div>
+  </nav>
 
-    <!-- Filters -->
-    <div class="filters">
-      <button class="filter-btn active">All</button>
-      <button class="filter-btn">Pending</button>
-      <button class="filter-btn">Urgent</button>
-      <button class="filter-btn">New</button>
-      <button class="filter-btn">Confirmed</button>
-    </div>
+  <div id="listPage" class="page active">
+    <div class="list-wrap">
+      <div class="list-header">
+        <h1>Appointment Requests</h1>
+        <p>Manage your upcoming patient consultations and requests.</p>
+      </div>
 
-    <!-- ── URGENT ── -->
-    <div class="section-title">Urgent</div>
-    <div class="appt-list">
-
-      <div class="appt-card" onclick="showDetail('appt1')">
-        <div class="appt-avatar amber">MB</div>
-        <div class="appt-main">
-          <div class="appt-name">Mohamed Ben Salem</div>
-          <div class="appt-meta">58 yrs · Male · +216 22 987 654</div>
-          <span class="appt-reason">Chest pain, shortness of breath</span>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value"><?= $stats['total'] ?></div>
         </div>
-        <div class="appt-right">
-          <div>
-            <div class="appt-time">09:00 AM</div>
-            <div class="appt-date">Thu, 17 Apr</div>
-          </div>
-          <span class="badge badge-urgent"><span class="badge-dot"></span>Urgent</span>
+        <div class="stat-card">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value"><?= $stats['pending'] ?></div>
         </div>
-        <div class="appt-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <div class="stat-card">
+          <div class="stat-label">Scheduled</div>
+          <div class="stat-value"><?= $stats['scheduled'] ?></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value"><?= $stats['completed'] ?></div>
         </div>
       </div>
 
-    </div>
-
-    <!-- ── PENDING ── -->
-    <div class="section-title">Pending review</div>
-    <div class="appt-list">
-
-      <div class="appt-card" onclick="showDetail('appt2')">
-        <div class="appt-avatar blue">SA</div>
-        <div class="appt-main">
-          <div class="appt-name">Salma Ben Amor</div>
-          <div class="appt-meta">37 yrs · Female · +216 98 123 456</div>
-          <span class="appt-reason">Routine cardiac follow-up</span>
-        </div>
-        <div class="appt-right">
-          <div>
-            <div class="appt-time">10:30 AM</div>
-            <div class="appt-date">Thu, 17 Apr</div>
-          </div>
-          <span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>
-        </div>
-        <div class="appt-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterAppointments('all')">All</button>
+        <button class="filter-btn" onclick="filterAppointments('Pending')">Pending Requests</button>
+        <button class="filter-btn" onclick="filterAppointments('Scheduled')">Upcoming</button>
       </div>
 
-      <div class="appt-card" onclick="showDetail('appt3')">
-        <div class="appt-avatar green">LT</div>
-        <div class="appt-main">
-          <div class="appt-name">Leila Trabelsi</div>
-          <div class="appt-meta">44 yrs · Female · +216 55 300 211</div>
-          <span class="appt-reason">Palpitations, fatigue</span>
-        </div>
-        <div class="appt-right">
-          <div>
-            <div class="appt-time">11:15 AM</div>
-            <div class="appt-date">Thu, 17 Apr</div>
+      <div class="appt-list" id="appointmentsContainer">
+        <?php foreach ($appointments as $appt): ?>
+          <?php
+          // Determine badge colors based on status
+          $badgeClass = 'badge-new';
+          if ($appt['status'] === 'Pending') $badgeClass = 'badge-pending';
+          if ($appt['status'] === 'Cancelled' || $appt['status'] === 'No-Show') $badgeClass = 'badge-urgent';
+
+          // Extract initials for avatar
+          $initials = strtoupper(substr($appt['patient_name'], 0, 1));
+          ?>
+          <div class="appt-card" data-status="<?= htmlspecialchars($appt['status']) ?>" onclick="viewDetails(<?= $appt['appointment_id'] ?>)">
+            <div class="appt-avatar blue"><?= $initials ?></div>
+            <div>
+              <div class="appt-name"><?= htmlspecialchars($appt['patient_name']) ?></div>
+              <div class="appt-meta"><?= htmlspecialchars($appt['patient_email']) ?></div>
+              <div class="appt-reason"><?= htmlspecialchars($appt['reason'] ?: 'General Consultation') ?></div>
+            </div>
+            <div class="appt-right">
+              <div class="badge <?= $badgeClass ?>">
+                <span class="badge-dot"></span> <?= htmlspecialchars($appt['status']) ?>
+              </div>
+              <div class="appt-time"><?= date('H:i', strtotime($appt['appointment_time'])) ?></div>
+              <div class="appt-date"><?= date('M d, Y', strtotime($appt['appointment_date'])) ?></div>
+            </div>
           </div>
-          <span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>
-        </div>
-        <div class="appt-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
+        <?php endforeach; ?>
+
+        <?php if (empty($appointments)): ?>
+          <p style="text-align:center; color: var(--gray-400); padding: 2rem;">No appointments found.</p>
+        <?php endif; ?>
       </div>
-
-      <div class="appt-card" onclick="showDetail('appt4')">
-        <div class="appt-avatar amber">KM</div>
-        <div class="appt-main">
-          <div class="appt-name">Khaled Mansouri</div>
-          <div class="appt-meta">63 yrs · Male · +216 71 445 890</div>
-          <span class="appt-reason">Post-surgery ECG check</span>
-        </div>
-        <div class="appt-right">
-          <div>
-            <div class="appt-time">02:00 PM</div>
-            <div class="appt-date">Thu, 17 Apr</div>
-          </div>
-          <span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>
-        </div>
-        <div class="appt-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ── NEW ── -->
-    <div class="section-title">New requests</div>
-    <div class="appt-list">
-
-      <div class="appt-card" onclick="showDetail('appt5')">
-        <div class="appt-avatar blue">RH</div>
-        <div class="appt-main">
-          <div class="appt-name">Rim Hamdi</div>
-          <div class="appt-meta">29 yrs · Female · +216 98 665 002</div>
-          <span class="appt-reason">First consultation, referred by GP</span>
-        </div>
-        <div class="appt-right">
-          <div>
-            <div class="appt-time">03:30 PM</div>
-            <div class="appt-date">Thu, 17 Apr</div>
-          </div>
-          <span class="badge badge-new"><span class="badge-dot"></span>New</span>
-        </div>
-        <div class="appt-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </div>
-
-      <div class="appt-card" onclick="showDetail('appt6')">
-        <div class="appt-avatar green">AO</div>
-        <div class="appt-main">
-          <div class="appt-name">Anis Oueslati</div>
-          <div class="appt-meta">51 yrs · Male · +216 25 870 140</div>
-          <span class="appt-reason">Hypertension management</span>
-        </div>
-        <div class="appt-right">
-          <div>
-            <div class="appt-time">04:15 PM</div>
-            <div class="appt-date">Thu, 17 Apr</div>
-          </div>
-          <span class="badge badge-new"><span class="badge-dot"></span>New</span>
-        </div>
-        <div class="appt-arrow">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        </div>
-      </div>
-
     </div>
   </div>
-</div>
 
-<!-- ════════════════════════════════════════════
-     PAGE 2 — APPOINTMENT DETAIL
-════════════════════════════════════════════ -->
-<div class="page" id="page-detail">
-  <div class="detail-wrap">
+  <div id="detailPage" class="page">
+    <div class="detail-wrap">
+      <button class="back-btn" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to list
+      </button>
 
-    <button class="back-btn" onclick="showList()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      Back to requests
-    </button>
-
-    <!-- Status banner -->
-    <div class="status-banner">
-      <div class="status-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <div class="status-banner" id="detailBanner">
+        <div class="status-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3" />
+          </svg></div>
+        <div class="status-text">
+          <h2 id="detailStatusLabel">Status</h2>
+          <p id="detailStatusSub">Action required</p>
+        </div>
       </div>
-      <div class="status-text">
-        <h2>Appointment request received</h2>
-        <p>Review the details below and confirm or reschedule.</p>
-      </div>
-    </div>
 
-    <!-- Doctor -->
-    <div class="d-card">
-      <div class="d-card-header">
-        <div class="d-card-label">Attending physician</div>
-        <h3>Doctor details</h3>
-      </div>
-      <div class="d-card-body">
-        <div class="doctor-row">
-          <div class="d-avatar">KA</div>
-          <div>
-            <div style="font-size:16px;font-weight:600;">Dr. Karim Ayari</div>
-            <div style="font-size:13px;color:var(--gray-400);margin-top:2px;">Cardiologist · Cardiology Dept.</div>
-            <span class="d-avatar-badge">Available</span>
+      <div class="d-card">
+        <div class="d-card-header">
+          <div class="d-card-label">Patient Details</div>
+          <h3 id="detailPatientName">Name</h3>
+        </div>
+        <div class="d-card-body">
+          <div class="detail-grid">
+            <div class="d-item">
+              <div class="d-item-label">Date</div>
+              <div class="d-item-value" id="detailDate">--</div>
+            </div>
+            <div class="d-item">
+              <div class="d-item-label">Time</div>
+              <div class="d-item-value" id="detailTime">--</div>
+            </div>
+          </div>
+
+          <div class="d-row">
+            <div class="d-row-label">Reason for visit</div>
+            <div class="d-row-value"><span class="type-pill" id="detailReason">--</span></div>
+          </div>
+
+          <div class="note-box" id="detailNotes" style="margin-top: 15px;">
+            No additional notes provided by the patient.
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Appointment details — filled dynamically -->
-    <div class="d-card">
-      <div class="d-card-header">
-        <div class="d-card-label">Scheduled visit</div>
-        <h3>Appointment details</h3>
+      <div class="d-actions" id="actionButtons">
+        <button class="d-btn d-btn-danger" onclick="updateStatus('Cancelled')">Decline / Cancel</button>
+        <button class="d-btn" onclick="promptReschedule()">Reschedule</button>
+        <button class="d-btn d-btn-primary" onclick="updateStatus('Scheduled')" style="grid-column: span 2;">Accept Appointment</button>
       </div>
-      <div class="d-card-body">
-        <div class="detail-grid">
-          <div class="d-item">
-            <div class="d-item-label">Date</div>
-            <div class="d-item-value" id="d-date">—</div>
-          </div>
-          <div class="d-item">
-            <div class="d-item-label">Time</div>
-            <div class="d-item-value" id="d-time">—</div>
-            <div class="d-item-sub">Duration: 30 min</div>
-          </div>
-        </div>
-        <div class="d-row">
-          <span class="d-row-label">Appointment type</span>
-          <span class="type-pill">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            In-person
-          </span>
-        </div>
-        <div class="d-row">
-          <span class="d-row-label">Location</span>
-          <span class="d-row-value">Room 204, Block B</span>
-        </div>
-        <div class="d-row">
-          <span class="d-row-label">Reference ID</span>
-          <span class="ref-id" id="d-ref">—</span>
-        </div>
+
+      <div class="d-actions-full" id="secondaryActionButtons" style="display:none;">
+        <button class="d-btn d-btn-primary" onclick="updateStatus('Completed')">Mark as Completed</button>
       </div>
     </div>
-
-    <!-- Patient info -->
-    <div class="d-card">
-      <div class="d-card-header">
-        <div class="d-card-label">Patient</div>
-        <h3>Patient information</h3>
-      </div>
-      <div class="d-card-body">
-        <div class="d-row">
-          <span class="d-row-label">Full name</span>
-          <span class="d-row-value" id="d-name">—</span>
-        </div>
-        <div class="d-row">
-          <span class="d-row-label">Age &amp; gender</span>
-          <span class="d-row-value" id="d-age">—</span>
-        </div>
-        <div class="d-row">
-          <span class="d-row-label">Contact</span>
-          <span class="d-row-value" id="d-phone">—</span>
-        </div>
-        <div class="d-row">
-          <span class="d-row-label">Reason for visit</span>
-          <span class="d-row-value" id="d-reason">—</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Notes -->
-    <div class="d-card">
-      <div class="d-card-header">
-        <div class="d-card-label">Notes</div>
-        <h3>Patient's note</h3>
-      </div>
-      <div class="d-card-body">
-        <div class="note-box" id="d-note">—</div>
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="d-actions">
-      <div class="d-btn d-btn-primary">Confirm appointment</div>
-      <div class="d-btn d-btn-danger">Decline</div>
-    </div>
-    <div class="d-actions-full">
-      <div class="d-btn">Propose new time</div>
-    </div>
-
-    <div class="footer-note" id="d-footer">—</div>
-
   </div>
-</div>
 
-<script>
-  const appointments = {
-    appt1: {
-      name: 'Mohamed Ben Salem',
-      age: '58 yrs · Male',
-      phone: '+216 22 987 654',
-      reason: 'Chest pain, shortness of breath',
-      note: 'Patient reports sudden chest tightness radiating to the left arm starting this morning. History of hypertension. Please prioritize and prepare ECG on arrival.',
-      date: 'Thursday, 17 Apr 2026',
-      time: '09:00 AM',
-      ref: '#APT-2026-00479',
-      submittedAt: '9 Apr 2026 at 07:02 AM'
-    },
-    appt2: {
-      name: 'Salma Ben Amor',
-      age: '37 yrs · Female',
-      phone: '+216 98 123 456',
-      reason: 'Routine cardiac follow-up',
-      note: 'Patient reports mild shortness of breath on exertion over the past 3 weeks. Please bring all previous ECG reports and medication list. Fasting is not required.',
-      date: 'Thursday, 17 Apr 2026',
-      time: '10:30 AM',
-      ref: '#APT-2026-00481',
-      submittedAt: '9 Apr 2026 at 08:14 AM'
-    },
-    appt3: {
-      name: 'Leila Trabelsi',
-      age: '44 yrs · Female',
-      phone: '+216 55 300 211',
-      reason: 'Palpitations, fatigue',
-      note: 'Patient has experienced irregular heartbeat episodes for 2 weeks, accompanied by general fatigue. No known cardiac history. Bring any recent blood work.',
-      date: 'Thursday, 17 Apr 2026',
-      time: '11:15 AM',
-      ref: '#APT-2026-00483',
-      submittedAt: '9 Apr 2026 at 09:45 AM'
-    },
-    appt4: {
-      name: 'Khaled Mansouri',
-      age: '63 yrs · Male',
-      phone: '+216 71 445 890',
-      reason: 'Post-surgery ECG check',
-      note: 'Follow-up after coronary bypass surgery performed 3 weeks ago. Patient is on anticoagulants. Bring discharge summary and full medication list.',
-      date: 'Thursday, 17 Apr 2026',
-      time: '02:00 PM',
-      ref: '#APT-2026-00485',
-      submittedAt: '9 Apr 2026 at 10:30 AM'
-    },
-    appt5: {
-      name: 'Rim Hamdi',
-      age: '29 yrs · Female',
-      phone: '+216 98 665 002',
-      reason: 'First consultation, referred by GP',
-      note: 'GP referral due to persistent tachycardia detected during routine checkup. No prior cardiac history. Patient is not on any medication.',
-      date: 'Thursday, 17 Apr 2026',
-      time: '03:30 PM',
-      ref: '#APT-2026-00488',
-      submittedAt: '9 Apr 2026 at 11:00 AM'
-    },
-    appt6: {
-      name: 'Anis Oueslati',
-      age: '51 yrs · Male',
-      phone: '+216 25 870 140',
-      reason: 'Hypertension management',
-      note: 'Patient on current antihypertensive medication for 6 months. Requesting review and possible dosage adjustment. Bring home blood pressure log if available.',
-      date: 'Thursday, 17 Apr 2026',
-      time: '04:15 PM',
-      ref: '#APT-2026-00490',
-      submittedAt: '9 Apr 2026 at 11:48 AM'
+  <script>
+    // Store appointments data in JS
+    const appointments = <?= json_encode($appointments) ?>;
+    let currentAppointmentId = null;
+
+    // UI View Switching
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
     }
-  };
 
-  function showDetail(id) {
-    const a = appointments[id];
-    if (!a) return;
-    document.getElementById('d-name').textContent   = a.name;
-    document.getElementById('d-age').textContent    = a.age;
-    document.getElementById('d-phone').textContent  = a.phone;
-    document.getElementById('d-reason').textContent = a.reason;
-    document.getElementById('d-note').textContent   = a.note;
-    document.getElementById('d-date').textContent   = a.date;
-    document.getElementById('d-time').textContent   = a.time;
-    document.getElementById('d-ref').textContent    = a.ref;
-    document.getElementById('d-footer').innerHTML   = 'Request submitted on ' + a.submittedAt + '<br>For urgent changes, contact reception at +216 71 000 000';
+    function goBack() {
+      showPage('listPage');
+    }
 
-    document.getElementById('page-list').classList.remove('active');
-    document.getElementById('page-detail').classList.add('active');
-    window.scrollTo({ top: 0 });
-  }
+    // Filtering list
+    function filterAppointments(status) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
 
-  function showList() {
-    document.getElementById('page-detail').classList.remove('active');
-    document.getElementById('page-list').classList.add('active');
-    window.scrollTo({ top: 0 });
-  }
-</script>
+      const cards = document.querySelectorAll('.appt-card');
+      cards.forEach(card => {
+        if (status === 'all' || card.dataset.status === status) {
+          card.style.display = 'grid';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
 
+    // Populate Detail View
+    function viewDetails(id) {
+      currentAppointmentId = id;
+      const appt = appointments.find(a => a.appointment_id == id);
+      if (!appt) return;
+
+      document.getElementById('detailPatientName').innerText = appt.patient_name;
+      document.getElementById('detailDate').innerText = new Date(appt.appointment_date).toLocaleDateString();
+      document.getElementById('detailTime').innerText = appt.appointment_time.substring(0, 5);
+      document.getElementById('detailReason').innerText = appt.reason || 'General';
+      document.getElementById('detailNotes').innerText = appt.notes || 'No additional notes provided.';
+
+      const banner = document.getElementById('detailBanner');
+      const statusLabel = document.getElementById('detailStatusLabel');
+      const statusSub = document.getElementById('detailStatusSub');
+      const actionBtns = document.getElementById('actionButtons');
+      const secondaryBtns = document.getElementById('secondaryActionButtons');
+
+      statusLabel.innerText = 'Status: ' + appt.status;
+
+      if (appt.status === 'Pending') {
+        banner.style.background = 'var(--amber-50)';
+        banner.style.borderColor = 'var(--amber-200)';
+        statusLabel.style.color = 'var(--amber-600)';
+        statusSub.innerText = 'Awaiting your confirmation';
+        actionBtns.style.display = 'grid';
+        secondaryBtns.style.display = 'none';
+      } else if (appt.status === 'Scheduled') {
+        banner.style.background = 'var(--blue-brand-50)';
+        banner.style.borderColor = 'var(--blue-brand-100)';
+        statusLabel.style.color = 'var(--blue-brand-700)';
+        statusSub.innerText = 'Appointment is confirmed';
+        actionBtns.style.display = 'none';
+        secondaryBtns.style.display = 'block';
+      } else {
+        banner.style.background = 'var(--gray-100)';
+        banner.style.borderColor = 'var(--gray-200)';
+        statusLabel.style.color = 'var(--gray-600)';
+        statusSub.innerText = 'Appointment closed';
+        actionBtns.style.display = 'none';
+        secondaryBtns.style.display = 'none';
+      }
+
+      showPage('detailPage');
+    }
+
+    // API Calls
+    async function updateStatus(newStatus) {
+      if (!confirm(`Are you sure you want to mark this as ${newStatus}?`)) return;
+
+      try {
+        const response = await fetch('update_appointment_status.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            appointment_id: currentAppointmentId,
+            status: newStatus
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          location.reload(); // Reload to refresh list and stats
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (error) {
+        alert('Network error occurred.');
+      }
+    }
+
+    async function promptReschedule() {
+      const newDate = prompt("Enter new date (YYYY-MM-DD):");
+      if (!newDate) return;
+      const newTime = prompt("Enter new time (HH:MM):");
+      if (!newTime) return;
+
+      try {
+        const response = await fetch('reschedule_appointment.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            appointment_id: currentAppointmentId,
+            new_date: newDate,
+            new_time: newTime + ':00'
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (error) {
+        alert('Network error occurred.');
+      }
+    }
+  </script>
 </body>
+
 </html>

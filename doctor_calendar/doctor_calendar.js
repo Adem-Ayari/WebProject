@@ -34,18 +34,21 @@
   const fNotes = document.getElementById("eventNotes");
   const patientRow = document.getElementById("patientRow");
 
-  function loadEvents() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch {
-      return [];
-    }
-  }
+function loadEvents() {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const localEvents = stored ? JSON.parse(stored) : [];
+    
+    const manualEvents = localEvents.filter(e => !e.id.toString().startsWith('db_'));
 
-  function saveEvents() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.events));
-  }
+    const dbAppointments = window.DB_EVENTS || [];
 
+    return [...manualEvents, ...dbAppointments];
+}
+
+function saveEvents() {
+    const manualEvents = state.events.filter(e => !e.id.toString().startsWith('db_'));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(manualEvents));
+}
   function pad(n) {
     return String(n).padStart(2, "0");
   }

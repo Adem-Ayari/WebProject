@@ -27,8 +27,8 @@ CREATE TABLE Doctor (
     about           TEXT,
     rating          DECIMAL(2,1) DEFAULT 0.0,
     reviews         INT DEFAULT 0,
-    image_path       VARCHAR(255) DEFAULT NULL
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    image_path       VARCHAR(255) DEFAULT NULL,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Appointment Table
@@ -66,10 +66,10 @@ INSERT INTO Doctor (name, email, phone, specialization, license_number, experien
 -- Sample Data for Appointment Table
 INSERT INTO Appointment (patient_id, doctor_id, appointment_date, appointment_time, status, reason, notes) VALUES
 (1, 1, '2026-04-10', '10:00:00', 'Scheduled', 'Annual Checkup', 'Regular heart examination'),
-(2, 2, '2026-04-12', '14:30:00', 'Scheduled', 'Headache Consultation', 'Patient reports recurring headaches'),
-(3, 3, '2026-04-15', '09:00:00', 'Completed', 'Knee Pain', 'Knee injury assessment'),
-(4, 4, '2026-04-08', '15:00:00', 'Scheduled', 'Skin Rash', 'Dermatological examination'),
-(5, 5, '2026-04-20', '11:00:00', 'Scheduled', 'Immunization', 'Routine vaccination');
+(2, 1, '2026-04-12', '14:30:00', 'Scheduled', 'Headache Consultation', 'Patient reports recurring headaches'),
+(3, 1, '2026-04-15', '09:00:00', 'Completed', 'Knee Pain', 'Knee injury assessment'),
+(4, 1, '2026-04-08', '15:00:00', 'Pending', 'Skin Rash', 'Dermatological examination'),
+(5, 1, '2026-04-20', '11:00:00', 'Scheduled', 'Immunization', 'Routine vaccination');
 
 
 select * from Patient;
