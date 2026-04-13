@@ -29,6 +29,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
   header('Location: index.php');
   exit;
 }
+
+require_once '../backend/autoloader.php';
+
+try {
+  $db = ConnexionDB::getInstance();
+  
+  // Fetch doctors for the "Meet Our Specialists" section (Limited to 3)
+  $stmt = $db->query("SELECT id, name, specialization, rating, reviews, experience, consultation_fee, image_path, about FROM Doctor ORDER BY rating DESC LIMIT 3");
+  $doctorsList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+  $doctorsList = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -65,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
         </nav>
 
         <div class="nav-actions">
-          <a href="<?php echo !($is_doctor) ? '../rechercher_docteurs/rechercher_docteurs.php' : '#'?>" class="btn">Find Doctors</a>
+          <a href="<?php echo !($is_doctor) ? '../acceptAppointment/index.php' : '../rechercher_docteurs/rechercher_docteurs.php'?>" class="btn">Find Doctors</a>
           <a href="<?php echo $is_doctor ? '../acceptAppointment/index.php' : '../dashboard_client/patient.php'; ?>" class="btn">Dashboard</a>
           <a href="../book/book.php" class="btn">Book Appointment</a>
           <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST">
@@ -493,265 +505,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['logout_submit'])) {
         </div>
 
         <div class="doctors-container">
-          <div class="doctors-sidebar">
-            <div class="doctors-card">
-              <h5
-                style="
-                  margin-bottom: 20px;
-                  font-size: 1.25rem;
-                  font-weight: bold;
-                "
-              >
-                Filter Doctors
-              </h5>
-
-              <div style="margin-bottom: 1rem">
-                <label>Search</label>
-                <input
-                  type="text"
-                  class="doctors-input"
-                  placeholder="Doctor name..."
-                />
-              </div>
-
-              <div style="margin-bottom: 1rem">
-                <label>Specialty</label>
-                <select class="doctors-select">
-                  <option>All Specialties</option>
-                  <option>Cardiology</option>
-                  <option>Dermatology</option>
-                </select>
-              </div>
-
-              <div style="margin-bottom: 1rem">
-                <label>Availability</label>
-                <div>
-                  <input type="checkbox" id="check1" />
-                  <label
-                    for="check1"
-                    style="display: inline; font-weight: normal"
-                  >
-                    Available Today
-                  </label>
-                </div>
-              </div>
-
-              <button
-                class="doctors-btn doctors-btn-primary"
-                style="width: 100%"
-              >
-                Apply Filters
-              </button>
-            </div>
-          </div>
-
           <div class="doctors-grid">
-            <div class="doctors-card doctors-hover">
-              <img
-                src="https://placehold.co/400x300"
-                class="doctors-img"
-                alt="Doctor"
-              />
-              <div style="padding: 1rem">
-                <h5
-                  style="
-                    margin-bottom: 0.5rem;
-                    font-weight: bold;
-                    font-size: 1.25rem;
-                  "
-                >
-                  Dr. Sarah Smith
-                </h5>
-                <p
-                  style="
-                    color: #0d6efd;
-                    font-size: 0.875em;
-                    margin-bottom: 0.5rem;
-                  "
-                >
-                  Cardiologist
-                </p>
-                <div
-                  style="
-                    color: #ffc107;
-                    font-size: 0.875em;
-                    margin-bottom: 0.5rem;
-                  "
-                >
-                  ★ 4.9 (120 reviews)
+            <?php foreach ($doctorsList as $doc): ?>
+              <?php 
+                $docImagePath = !empty($doc['image_path']) ? '../view profile/' . $doc['image_path'] : 'https://cdn-icons-png.flaticon.com/512/3774/3774299.png';
+              ?>
+              <div class="doctors-card doctors-hover">
+                <img
+                  src="<?= $docImagePath ?>"
+                  class="doctors-img"
+                  alt="<?= htmlspecialchars($doc['name']) ?>"
+                />
+                <div style="padding: 1rem">
+                  <h5
+                    style="
+                      margin-bottom: 0.5rem;
+                      font-weight: bold;
+                      font-size: 1.25rem;
+                    "
+                  >
+                    <?= htmlspecialchars($doc['name']) ?>
+                  </h5>
+                  <p
+                    style="
+                      color: #0d6efd;
+                      font-size: 0.875em;
+                      margin-bottom: 0.5rem;
+                    "
+                  >
+                    <?= htmlspecialchars($doc['specialization']) ?>
+                  </p>
+                  <div
+                    style="
+                      color: #ffc107;
+                      font-size: 0.875em;
+                      margin-bottom: 0.5rem;
+                    "
+                  >
+                    ★ <?= htmlspecialchars($doc['rating']) ?> (<?= htmlspecialchars($doc['reviews']) ?> reviews)
+                  </div>
+                  <p
+                    style="
+                      color: #6c757d;
+                      font-size: 0.875em;
+                      margin-bottom: 1rem;
+                    "
+                  >
+                    <?= htmlspecialchars($doc['experience']) ?>. <?= htmlspecialchars(substr($doc['about'], 0, 100)) ?>...
+                  </p>
+  
+                  <div class="doctors-info-box">
+                    <span>
+                      Next:
+                      <b>Available Today</b>
+                    </span>
+                    <span>
+                      Fee:
+                      <b><?= htmlspecialchars($doc['consultation_fee']) ?></b>
+                    </span>
+                  </div>
                 </div>
-                <p
-                  style="
-                    color: #6c757d;
-                    font-size: 0.875em;
-                    margin-bottom: 1rem;
-                  "
-                >
-                  15+ years experience. Expert in heart health.
-                </p>
-
-                <div class="doctors-info-box">
-                  <span>
-                    Next:
-                    <b>Today, 2PM</b>
-                  </span>
-                  <span>
-                    Fee:
-                    <b>$75</b>
-                  </span>
-                </div>
-              </div>
-              <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
-                <a
-                  href="../book/book.php"
-                  class="doctors-btn doctors-btn-primary"
-                  style="margin-bottom: 0.5rem"
-                >
-                  Book Now
-                </a>
-                <a href="../view profile/view-profile.php?id=1" class="doctors-btn doctors-btn-outline"
-                  >View Profile</a
-                >
-              </div>
-            </div>
-
-            <div class="doctors-card doctors-hover">
-              <img
-                src="https://placehold.co/400x300"
-                class="doctors-img"
-                alt="Doctor"
-              />
-              <div style="padding: 1rem">
-                <h5
-                  style="
-                    margin-bottom: 0.5rem;
-                    font-weight: bold;
-                    font-size: 1.25rem;
-                  "
-                >
-                  Dr. James Wilson
-                </h5>
-                <p
-                  style="
-                    color: #0d6efd;
-                    font-size: 0.875em;
-                    margin-bottom: 0.5rem;
-                  "
-                >
-                  Dermatologist
-                </p>
-                <div
-                  style="
-                    color: #ffc107;
-                    font-size: 0.875em;
-                    margin-bottom: 0.5rem;
-                  "
-                >
-                  ★ 4.8 (85 reviews)
-                </div>
-                <p
-                  style="
-                    color: #6c757d;
-                    font-size: 0.875em;
-                    margin-bottom: 1rem;
-                  "
-                >
-                  Specialist in skincare and acne treatment.
-                </p>
-
-                <div class="doctors-info-box">
-                  <span>
-                    Next:
-                    <b>Tomorrow</b>
-                  </span>
-                  <span>
-                    Fee:
-                    <b>$60</b>
-                  </span>
+                <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
+                  <a
+                    href="../book/book.php"
+                    class="doctors-btn doctors-btn-primary"
+                    style="margin-bottom: 0.5rem"
+                  >
+                    Book Now
+                  </a>
+                  <a href="../view profile/view-profile.php?id=<?= $doc['id'] ?>" class="doctors-btn doctors-btn-outline"
+                    >View Profile</a
+                  >
                 </div>
               </div>
-              <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
-                <a
-                  href="../book/book.php"
-                  class="doctors-btn doctors-btn-primary"
-                  style="margin-bottom: 0.5rem"
-                >
-                  Book Now
-                </a>
-                <a href="../view profile/view-profile.php?id=2" class="doctors-btn doctors-btn-outline"
-                  >View Profile</a
-                >
-              </div>
-            </div>
-
-            <div class="doctors-card doctors-hover">
-              <img
-                src="https://placehold.co/400x300"
-                class="doctors-img"
-                alt="Doctor"
-              />
-              <div style="padding: 1rem">
-                <h5
-                  style="
-                    margin-bottom: 0.5rem;
-                    font-weight: bold;
-                    font-size: 1.25rem;
-                  "
-                >
-                  Dr. Emily Rose
-                </h5>
-                <p
-                  style="
-                    color: #0d6efd;
-                    font-size: 0.875em;
-                    margin-bottom: 0.5rem;
-                  "
-                >
-                  Pediatrician
-                </p>
-                <div
-                  style="
-                    color: #ffc107;
-                    font-size: 0.875em;
-                    margin-bottom: 0.5rem;
-                  "
-                >
-                  ★ 5.0 (200 reviews)
-                </div>
-                <p
-                  style="
-                    color: #6c757d;
-                    font-size: 0.875em;
-                    margin-bottom: 1rem;
-                  "
-                >
-                  Compassionate care for children of all ages.
-                </p>
-
-                <div class="doctors-info-box">
-                  <span>
-                    Next:
-                    <b>Today, 4PM</b>
-                  </span>
-                  <span>
-                    Fee:
-                    <b>$90</b>
-                  </span>
-                </div>
-              </div>
-              <div style="padding: 1rem; border-top: 1px solid #f0f0f0">
-                <a
-                  href="../book/book.php"
-                  class="doctors-btn doctors-btn-primary"
-                  style="margin-bottom: 0.5rem"
-                >
-                  Book Now
-                </a>
-                <a href="../view profile/view-profile.php?id=3" class="doctors-btn doctors-btn-outline"
-                  >View Profile</a
-                >
-              </div>
-            </div>
+            <?php endforeach; ?>
+            
+            <?php if (empty($doctorsList)): ?>
+                <p>No doctors found matching your criteria.</p>
+            <?php endif; ?>
+          </div>
+          
+          <div style="text-align: center; margin-top: 50px;">
+              <a href="../rechercher_docteurs/rechercher_docteurs.php" class="doctors-btn-outline" style="display: inline-block; padding: 10px 25px; border-radius: 50px; font-size: 14px; text-decoration: none; border: 1.5px solid #0a6cff; color: #0a6cff; transition: all 0.3s;">
+                  See more doctors →
+              </a>
           </div>
         </div>
       </section>

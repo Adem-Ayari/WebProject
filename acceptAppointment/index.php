@@ -12,6 +12,24 @@ try {
   $db = ConnexionDB::getInstance();
   $doctorId = $_SESSION['doctor_id'];
 
+  // Fetch doctor details (especially name for the navbar)
+  $stmtDoc = $db->prepare("SELECT name, image_path FROM Doctor WHERE id = ?");
+  $stmtDoc->execute([$doctorId]);
+  $doctor = $stmtDoc->fetch(PDO::FETCH_ASSOC);
+  $doctorName = $doctor ? $doctor['name'] : 'Doctor';
+  
+  // Calculate initials (e.g., James Wilson -> JW)
+  $nameParts = explode(' ', trim($doctorName));
+  if (count($nameParts) >= 2) {
+      $initials = strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[count($nameParts)-1], 0, 1));
+  } else {
+      $initials = strtoupper(substr($doctorName, 0, 2));
+  }
+  
+  $hasProfileImage = ($doctor && !empty($doctor['image_path']));
+  $placeholderImage = "https://cdn-icons-png.flaticon.com/512/3774/3774299.png";
+  $profileImageFull = $hasProfileImage ? '../view profile/' . $doctor['image_path'] : $placeholderImage;
+
   // Fetch all appointments for the logged-in doctor, including patient details
   $stmt = $db->prepare("
         SELECT A.*, P.name AS patient_name, P.email AS patient_email
@@ -48,7 +66,7 @@ try {
 <body>
 
   <nav class="navbar">
-    <div class="logo">Health<span>Care</span></div>
+    <div class="logo">Health<span>Connect</span></div>
     <div class="nav-links">
       <a href="../doctor_calendar/doctor_calendar.php">Calendar</a>
       <a href="#">Appointments</a>
@@ -56,7 +74,7 @@ try {
     </div>
     <div class="nav-actions">
       <a href="../view profile/doctor-profile.php" class="profile-account me-3">
-            <img src="uploads/doctor.jpg" alt="Profile" class="profile-avatar">
+            <img src="<?= $profileImageFull ?>" alt="Profile" class="profile-avatar">
             <span class="profile-name"><?= htmlspecialchars($doctorName) ?></span>
         </a>
       <a href="../login_signup/logout.php" class="btn-logout">Logout</a>

@@ -72,12 +72,13 @@ try{
             </div>
         </header>
 <section class="our-doctors" id="doctors">
-        <div style="text-align: center; margin-bottom: 40px">
-          <h2 style="color: #0a6cff; font-size: 32px; margin-bottom: 10px">
-            Meet Our Specialists
+        <div style="text-align: center; margin-bottom: 60px">
+          <h2 style="color: #0a6cff; font-size: 42px; font-weight: 800; margin-bottom: 15px; letter-spacing: -1.5px;">
+            Find Your Specialist
           </h2>
-          <p style="color: #666; font-size: 18px">
-            Connect with experienced doctors from the comfort of your home.
+          <div style="width: 50px; height: 4px; background: #0a6cff; margin: 0 auto 20px; border-radius: 2px;"></div>
+          <p style="color: #64748b; font-size: 19px; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+            Search through our network of board-certified medical professionals and book your appointment in seconds.
           </p>
         </div>
 
@@ -132,20 +133,32 @@ try{
             </div>
         <?php else: ?>
             <?php foreach ($doctors as $doc): ?>
-<div class="doctor-card">
-    <img src="<?php echo (!empty($doc['photo']) ? '../' . $doc['photo'] : 'https://img.freepik.com/free-photo/portrait-doctor-with-stethoscope_23-2148840478.jpg'); ?>" alt="Dr <?php echo htmlspecialchars($doc['name']); ?>" class="doctor-img">
-    <h3>Dr. <?php echo htmlspecialchars($doc['name']); ?></h3>
-    <p class="specialty"><?php echo htmlspecialchars($doc['specialization']); ?></p>
-    <div class="rating">★ <?php echo htmlspecialchars($doc['rating']); ?> (<?php echo htmlspecialchars($doc['review_count']); ?> reviews)</div>
-    <p class="bio"><?php echo htmlspecialchars($doc['bio'] ?: 'Experienced medical professional'); ?></p>
-    
-    <div class="info-box">
-        <span>Next: <b>Today, 2PM</b></span> <span>Fee: <b>$<?php echo htmlspecialchars($doc['fee']); ?></b></span>
-    </div>
+              <?php 
+                $docImagePath = !empty($doc['photo']) ? '../view profile/' . $doc['photo'] : 'https://cdn-icons-png.flaticon.com/512/3774/3774299.png';
+              ?>
+              <div class="doctor-card">
+                  <div class="doctor-img-container">
+                    <img src="<?= $docImagePath ?>" alt="Dr <?= htmlspecialchars($doc['name']) ?>" class="doctor-img">
+                    <div class="doctor-badge">Next: Today</div>
+                  </div>
+                  <div class="doctor-content">
+                    <h3><?= (strpos($doc['name'], 'Dr.') === 0) ? htmlspecialchars($doc['name']) : 'Dr. ' . htmlspecialchars($doc['name']) ?></h3>
+                    <p class="specialty"><?= htmlspecialchars($doc['specialization']) ?></p>
+                    <div class="rating">★ <?= htmlspecialchars($doc['rating']) ?> (<?= htmlspecialchars($doc['review_count']) ?> reviews)</div>
+                    <p class="bio"><?= htmlspecialchars($doc['bio'] ?: 'Board-certified ' . $doc['specialization'] . ' with extensive experience in clinical practice.') ?></p>
+                    
+                    <div class="info-box">
+                        <span>Fee: <b><?= htmlspecialchars($doc['fee']) ?></b></span>
+                        <span>Exp: <b><?= htmlspecialchars($doc['experience'] ?: '5+ Years') ?></b></span>
+                        <span>Location: <b><?= htmlspecialchars($doc['office_place'] ?: 'In-Clinic') ?></b></span>
+                    </div>
 
-    <a href="../book/book.php?id=<?php echo $doc['id']; ?>" class="btn btn-primary">Book Now</a>
-    <a href="../view profile/view-profile.php?id=<?php echo $doc['id']; ?>" class="btn btn-outline">View Profile</a>
-</div>
+                    <div class="card-actions">
+                        <a href="../book/book.php?id=<?= $doc['id'] ?>" class="btn btn-primary">Book Now</a>
+                        <a href="../view profile/view-profile.php?id=<?= $doc['id'] ?>" class="btn btn-outline">Profile</a>
+                    </div>
+                  </div>
+              </div>
             <?php endforeach; ?>
         <?php endif; ?>
           </div>

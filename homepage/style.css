@@ -643,27 +643,49 @@ footer {
   }
 }
 .our-doctors {
-  background: #f4f9ff;
-  padding: 60px 20px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%);
+  padding: 100px 40px;
+  position: relative;
+  overflow: hidden;
 }
+
+.our-doctors::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(10, 108, 255, 0.05) 0%, transparent 70%);
+  z-index: 0;
+}
+
 .doctors-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 24px;
-  max-width: 1320px;
+  gap: 30px;
+  max-width: 1200px;
   margin: 0 auto;
-  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
+
 .doctors-sidebar {
   flex: 0 0 auto;
   width: 100%;
   max-width: 300px;
-  /* Force left alignment for filter box */
   text-align: left !important;
 }
+
 .doctors-sidebar .doctors-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(10, 108, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  border-radius: 20px;
   padding: 25px;
 }
+
 .doctors-sidebar h5 {
   border-bottom: 1px solid #eee;
   padding-bottom: 15px;
@@ -671,6 +693,7 @@ footer {
   font-size: 1.2rem;
   color: #000;
 }
+
 .doctors-sidebar label {
   font-weight: 600;
   color: #444;
@@ -678,92 +701,141 @@ footer {
   display: block;
   font-size: 14px;
 }
+
 .doctors-sidebar input[type='checkbox'] {
   margin-right: 8px;
   transform: scale(1.1);
 }
+
 .doctors-grid {
-  flex: 1 0 0%;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
+  flex: 1 1 0%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  width: 100%;
 }
+
+@media (max-width: 992px) {
+  .doctors-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .doctors-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .doctors-card {
   background-color: #fff;
-  border: 1px solid rgba(0, 0, 0, 0.125);
-  border-radius: 15px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  flex: 1 1 300px;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-.doctors-hover {
-  transition: transform 0.2s;
-}
+
 .doctors-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-12px);
+  box-shadow: 0 20px 40px rgba(10, 108, 255, 0.1);
+  border-color: rgba(10, 108, 255, 0.3);
 }
+
 .doctors-img {
   width: 100%;
-  height: 200px;
+  height: 240px;
   object-fit: cover;
   background-color: #eee;
+  transition: transform 0.5s ease;
 }
+
+.doctors-card:hover .doctors-img {
+  transform: scale(1.05);
+}
+
 .doctors-info-box {
-  background-color: #f8f9fa;
-  padding: 0.7rem;
-  border-radius: 6px;
+  background-color: #f8fbff;
+  padding: 0.8rem;
+  border-radius: 12px;
   display: flex;
   justify-content: space-between;
   font-size: 0.9em;
   margin-top: 10px;
+  border: 1px solid #edf4ff;
 }
+
+.doctors-info-box b {
+  color: #0a6cff;
+}
+
 .doctors-btn {
   display: block;
   width: 100%;
-  padding: 10px;
-  font-size: 1rem;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
   text-align: center;
   text-decoration: none;
   border-radius: 50rem;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  border: 1px solid transparent;
+  border: 1.5px solid transparent;
 }
+
 .doctors-btn-primary {
   color: #fff;
-  background-color: #0d6efd;
-  border-color: #0d6efd;
+  background: linear-gradient(135deg, #0a6cff 0%, #0055cc 100%);
+  box-shadow: 0 4px 15px rgba(10, 108, 255, 0.2);
 }
+
 .doctors-btn-primary:hover {
-  background-color: #0b5ed7;
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(10, 108, 255, 0.3);
 }
+
 .doctors-btn-outline {
-  color: #0d6efd;
-  border-color: #0d6efd;
+  color: #0a6cff;
+  border-color: #0a6cff;
   background-color: transparent;
 }
+
 .doctors-btn-outline:hover {
-  color: #fff;
-  background-color: #0d6efd;
+  background-color: #f0f7ff;
+  color: #0055cc;
+  border-color: #0055cc;
 }
+
 .doctors-input,
 .doctors-select {
   display: block;
   width: 100%;
-  padding: 10px;
-  font-size: 1rem;
+  padding: 12px;
+  font-size: 0.95rem;
   color: #212529;
   background-color: #fff;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
+  border: 1.5px solid #edf2f7;
+  border-radius: 12px;
   outline: none;
+  transition: all 0.3s ease;
 }
+
 .doctors-input:focus,
 .doctors-select:focus {
   border-color: #0a6cff;
+  box-shadow: 0 0 0 3px rgba(10, 108, 255, 0.1);
 }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.doctors-card {
+  animation: fadeInUp 0.6s ease backwards;
+}
+
 @media (max-width: 992px) {
   .doctors-sidebar {
     max-width: 100%;
